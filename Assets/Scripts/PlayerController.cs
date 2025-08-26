@@ -5,6 +5,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5.0f;
     public float gravity = -9.81f;
     public float rotationSpeed = 10.0f; // 追加: キャラクターの旋回速度
+    public float jumpHeight = 1.2f;
 
     private CharacterController characterController;
     private Vector3 playerVelocity;
