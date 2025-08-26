@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5.0f;
+    public float dashSpeed = 10.0f;
     public float gravity = -9.81f;
     public float rotationSpeed = 10.0f;
     public float jumpHeight = 1.2f;
@@ -41,6 +42,11 @@ public class PlayerController : MonoBehaviour
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
 
+        // 追加: ダッシュボタン（デフォルトは左Shift）が押されているか？
+        bool isDashing = Input.GetKey(KeyCode.LeftShift);
+        // 押されていればdashSpeedを、そうでなければmoveSpeedを使用
+        float currentSpeed = isDashing ? dashSpeed : moveSpeed;
+
         Vector3 cameraForward = mainCameraTransform.forward;
         Vector3 cameraRight = mainCameraTransform.right;
 
@@ -52,7 +58,7 @@ public class PlayerController : MonoBehaviour
 
         Vector3 moveDirection = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized;
 
-        characterController.Move(moveDirection * moveSpeed * Time.deltaTime);
+        characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
 
         if (moveDirection != Vector3.zero)
         {
