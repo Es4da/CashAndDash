@@ -17,11 +17,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 playerVelocity;
     private Transform mainCameraTransform;
     private bool isGrounded; // bool変数をUpdateの外に移動
+    private Animator animator;
 
     void Start()
     {
         characterController = GetComponent<CharacterController>();
         mainCameraTransform = Camera.main.transform;
+        animator = GetComponentInChildren<Animator>();
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -59,6 +61,11 @@ public class PlayerController : MonoBehaviour
         Vector3 moveDirection = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized;
 
         characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
+
+        // 変更: 水平方向の実際の速度を計算
+        float speed = new Vector3(characterController.velocity.x, 0, characterController.velocity.z).magnitude;
+        // 変更: Animatorの"Speed"パラメータに値をセット
+        animator.SetFloat("Speed", speed);
 
         if (moveDirection != Vector3.zero)
         {
