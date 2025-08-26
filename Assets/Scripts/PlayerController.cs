@@ -76,6 +76,7 @@ public class PlayerController : MonoBehaviour
         // --- ジャンプ処理 ---
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
+            animator.SetTrigger("Jump"); 
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * gravity);
         }
 
