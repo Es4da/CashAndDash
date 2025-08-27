@@ -96,17 +96,21 @@ public class PlayerController : MonoBehaviour
         // 実際にレイを発射する
         if (Physics.Raycast(rayOrigin, rayDirection, out hit, interactDistance))
         {
-            // 当たったオブジェクトのタグが"Interactable"なら
             if (Input.GetKeyDown(KeyCode.F))
+            {
+                // 当たったオブジェクトから、それぞれのスクリプトを持っているか試す
+                TreasureBox treasure = hit.collider.GetComponent<TreasureBox>();
+                Van van = hit.collider.GetComponent<Van>();
+
+                if (treasure != null) // もしTreasureBoxスクリプトを持っていたら
                 {
-                    // 変更点: 当たったオブジェクトがTreasureBoxかどうかを調べる
-                    TreasureBox treasure = hit.collider.GetComponent<TreasureBox>();
-                    if (treasure != null)
-                    {
-                        // TreasureBoxのOnInteract関数を呼び出す
-                        treasure.OnInteract();
-                    }
+                    treasure.OnInteract(); // 宝箱の機能（お金を拾う）を呼び出す
                 }
+                else if (van != null) // もしVanスクリプトを持っていたら
+                {
+                    van.OnInteract(); // バンの機能（お金を納品する）を呼び出す
+                }
+            }
         }
     }
 }
