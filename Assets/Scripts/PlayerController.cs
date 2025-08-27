@@ -7,6 +7,8 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
     public float rotationSpeed = 10.0f;
     public float jumpHeight = 1.2f;
+    public float interactDistance = 3f;
+    public Transform playerEyes;
 
     // --- 地面判定用の変数を追加 ---
     public Transform groundCheck;      // 地面判定オブジェクトのTransform
@@ -76,12 +78,35 @@ public class PlayerController : MonoBehaviour
         // --- ジャンプ処理 ---
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
-            animator.SetTrigger("Jump"); 
+            animator.SetTrigger("Jump");
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * gravity);
         }
 
         // --- 垂直方向の移動 ---
         playerVelocity.y += gravity * Time.deltaTime;
         characterController.Move(playerVelocity * Time.deltaTime);
+
+        // レイの発射地点を「Davidの目」の位置に設定
+        Vector3 rayOrigin = playerEyes.position;
+        // レイの方向を「メインカメラが向いている正面方向」に設定
+        Vector3 rayDirection = Camera.main.transform.forward;
+
+        RaycastHit hit; // 当たったオブジェクトの情報を入れる変数
+
+        // 実際にレイを発射する
+        if (Physics.Raycast(rayOrigin, rayDirection, out hit, interactDistance))
+        {
+            // 当たったオブジェクトのタグが"Interactable"なら
+            if (Input.GetKeyDown(KeyCode.F))
+                {
+                    // 変更点: 当たったオブジェクトがTreasureBoxかどうかを調べる
+                    TreasureBox treasure = hit.collider.GetComponent<TreasureBox>();
+                    if (treasure != null)
+                    {
+                        // TreasureBoxのOnInteract関数を呼び出す
+                        treasure.OnInteract();
+                    }
+                }
+        }
     }
 }
