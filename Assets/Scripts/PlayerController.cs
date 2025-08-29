@@ -153,25 +153,23 @@ public class PlayerController : MonoBehaviour
     }
     void HandleAttack()
     {
-        // 左クリックが押された瞬間に攻撃
         if (Input.GetMouseButtonDown(0))
         {
-            // 1. 攻撃アニメーションを再生
             animator.SetTrigger("Attack");
 
-            // 2. 攻撃範囲内にいる敵を探す
             Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange);
 
-            // 3. 見つけた敵すべてにダメージを与える
             foreach (Collider enemyCollider in hitEnemies)
             {
-                // "Enemy"タグが付いているか確認
                 if (enemyCollider.CompareTag("Enemy"))
                 {
                     EnemyHealth enemyHealth = enemyCollider.GetComponent<EnemyHealth>();
                     if (enemyHealth != null)
                     {
-                        enemyHealth.TakeDamage(attackDamage);
+                        // 追加: ノックバックの方向を計算（プレイヤーから敵へ）
+                        Vector3 knockbackDirection = (enemyCollider.transform.position - transform.position).normalized;
+                        // 変更: 計算した方向をTakeDamage関数に渡す
+                        enemyHealth.TakeDamage(attackDamage, knockbackDirection);
                     }
                 }
             }
