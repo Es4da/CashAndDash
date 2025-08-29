@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public int currentMoney = 0; // 現在プレイヤーが"所持"しているお金
     public int deliveredMoney = 0; // バンに"納品"した総額
+    public int moneyGoal = 500;
 
     public TextMeshProUGUI moneyText; // 所持金UIへの参照
     public TextMeshProUGUI deliveredMoneyText; // 納品総額UIへの参照（追加）

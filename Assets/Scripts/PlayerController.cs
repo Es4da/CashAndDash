@@ -72,23 +72,17 @@ public class PlayerController : MonoBehaviour
             playerVelocity.y = -2f;
         }
 
-        // 2. 移動量の計算
-        Vector3 finalMove;
+        // --- 2. 移動量の計算 ---
+        Vector3 finalMove = HandleMovementAndRotation();
+        HandleInteraction();
+        HandleAttack();
 
         if (knockbackVelocity.magnitude > 0.2f)
         {
-            // ノックバック中の移動
-            finalMove = knockbackVelocity;
+            finalMove += knockbackVelocity;
             knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, 5f * Time.deltaTime);
         }
-        else
-        {
-            // 通常時の移動と回転
-            finalMove = HandleMovementAndRotation();
-            HandleInteraction();
-            HandleAttack();
-        }
-
+        
         // 3. 重力の適用
         playerVelocity.y += gravity * Time.deltaTime;
         finalMove += playerVelocity;
