@@ -939,7 +939,7 @@ GameObject:
   - component: {fileID: 884643123}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1066,9 +1066,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30eeaf25791b64b408ec393aa3b688e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackRange: 1
+  attackRange: 1.75
   attackDamage: 30
   attackCooldown: 2
+  attackWindUp: 0.5
 --- !u!114 &884643123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2062,7 +2063,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1687258581}
-  m_LocalRotation: {x: 0.20031184, y: -0.3201609, z: 0.069456905, w: 0.9233352}
+  m_LocalRotation: {x: 0.20031184, y: -0.3201609, z: 0.069456905, w: 0.92333525}
   m_LocalPosition: {x: 3.7143464, y: 4, z: -4.712073}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2526,7 +2527,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1969601337}
-  m_LocalRotation: {x: 0.20031182, y: -0.3201609, z: 0.06945692, w: 0.9233352}
+  m_LocalRotation: {x: 0.20031182, y: -0.32016087, z: 0.069456905, w: 0.92333525}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
