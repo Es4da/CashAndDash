@@ -2,115 +2,193 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    // --- Public Variables ---
+    [Header("Movement")]
     public float moveSpeed = 5.0f;
     public float dashSpeed = 10.0f;
-    public float gravity = -9.81f;
-    public float rotationSpeed = 10.0f;
+    public float rotationSpeed = 15.0f; // 回転を速くするため少し値を上げました
+
+    [Header("Jumping & Gravity")]
     public float jumpHeight = 1.2f;
+    public float gravity = -20f; // 少し重力を強くすると、よりキビキビ動きます
+    public Transform groundCheck;
+    public float groundDistance = 0.2f;
+    public LayerMask groundMask;
+
+    [Header("Interaction")]
     public float interactDistance = 3f;
     public Transform playerEyes;
 
-    // --- 地面判定用の変数を追加 ---
-    public Transform groundCheck;      // 地面判定オブジェクトのTransform
-    public float groundDistance = 0.2f; // 地面判定の球体の半径
-    public LayerMask groundMask;       // 地面レイヤーを判別するためのマスク
+    [Header("Combat")]
+    public int maxHealth = 100;
+    public float knockbackForce = 15f;
+    public int attackDamage = 50;
+    public float attackRange = 1.5f;
+    public Transform attackPoint;
 
+    // --- Private Variables ---
     private CharacterController characterController;
-    private Vector3 playerVelocity;
-    private Transform mainCameraTransform;
-    private bool isGrounded; // bool変数をUpdateの外に移動
     private Animator animator;
+    private Transform mainCameraTransform;
+    private Transform playerModel; // ★追加: モデルのTransform
+
+    private Vector3 playerVelocity;
+    private Vector3 knockbackVelocity;
+    private bool isGrounded;
+    private int currentHealth;
 
     void Start()
     {
         characterController = GetComponent<CharacterController>();
-        mainCameraTransform = Camera.main.transform;
         animator = GetComponentInChildren<Animator>();
+        mainCameraTransform = Camera.main.transform;
 
+        // ★修正点: Playerオブジェクトの直下にある見た目の親を見つける ★
+        // Animatorが付いているオブジェクトの親（つまり見た目の一番親）を取得するか、
+        // もしAnimatorがPlayer直下に付いているならそのままAnimatorのTransformを使う
+        if (animator.transform.parent != transform) // Animatorの親がPlayer自身でなければ
+        {
+            playerModel = animator.transform.parent; // Animatorの親を使う
+        }
+        else
+        {
+            playerModel = animator.transform; // Animator自体がPlayer直下ならそれを使う
+        }
+        // もしくは、AnimatorコンポーネントがアタッチされているGameObjectを探す
+        // playerModel = animator.gameObject.transform; // これでも良い場合があります
+
+        currentHealth = maxHealth;
+        FindObjectOfType<GameManager>().UpdateHealthUI(currentHealth, maxHealth);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        // --- 新しい地面判定 ---
-        // groundCheckの位置に、半径groundDistanceの球体を作り、groundMaskに接触しているか判定
+        // 1. 状態の更新（地面判定）
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-
         if (isGrounded && playerVelocity.y < 0)
         {
-            playerVelocity.y = -2f; // 0fから-2fに変更。より地面に吸い付きやすくなる
+            playerVelocity.y = -2f;
         }
 
-        // --- 入力と移動 ---
+        // 2. 移動量の計算
+        Vector3 finalMove;
+
+        if (knockbackVelocity.magnitude > 0.2f)
+        {
+            // ノックバック中の移動
+            finalMove = knockbackVelocity;
+            knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, 5f * Time.deltaTime);
+        }
+        else
+        {
+            // 通常時の移動と回転
+            finalMove = HandleMovementAndRotation();
+            HandleInteraction();
+            HandleAttack();
+        }
+
+        // 3. 重力の適用
+        playerVelocity.y += gravity * Time.deltaTime;
+        finalMove += playerVelocity;
+        
+        // 4. 最終的な移動命令
+        characterController.Move(finalMove * Time.deltaTime);
+    }
+    private Vector3 HandleMovementAndRotation()
+    {
+        // --- 入力と速度の計算 ---
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
-
-        // 追加: ダッシュボタン（デフォルトは左Shift）が押されているか？
         bool isDashing = Input.GetKey(KeyCode.LeftShift);
-        // 押されていればdashSpeedを、そうでなければmoveSpeedを使用
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
 
-        Vector3 cameraForward = mainCameraTransform.forward;
-        Vector3 cameraRight = mainCameraTransform.right;
+        // --- 移動方向の計算 ---
+        Vector3 moveDirection = (mainCameraTransform.forward * verticalInput + mainCameraTransform.right * horizontalInput);
+        // 移動に使うベクトルからはY軸（上下）の情報を完全に抜き去る
+        moveDirection.y = 0;
+        // 水平にした後で、長さを1に正規化する（これにより斜め移動でも速度が一定になる）
+        moveDirection.Normalize();
 
-        cameraForward.y = 0;
-        cameraRight.y = 0;
+        // --- アニメーションの更新 ---
+        float animationSpeed = new Vector2(horizontalInput, verticalInput).magnitude;
+        animator.SetFloat("Speed", animationSpeed, 0.1f, Time.deltaTime);
 
-        cameraForward.Normalize();
-        cameraRight.Normalize();
-
-        Vector3 moveDirection = (cameraForward * verticalInput + cameraRight * horizontalInput).normalized;
-
-        characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
-
-        // 変更: 水平方向の実際の速度を計算
-        float speed = new Vector3(characterController.velocity.x, 0, characterController.velocity.z).magnitude;
-        // 変更: Animatorの"Speed"パラメータに値をセット
-        animator.SetFloat("Speed", speed);
-
-        if (moveDirection != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-
-        // --- ジャンプ処理 ---
+        // --- ジャンプ ---
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             animator.SetTrigger("Jump");
-            playerVelocity.y += Mathf.Sqrt(jumpHeight * -2.0f * gravity);
+            // playerVelocity.yに直接代入することで、ジャンプの連打を防ぐ
+            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
         }
 
-        // --- 垂直方向の移動 ---
-        playerVelocity.y += gravity * Time.deltaTime;
-        characterController.Move(playerVelocity * Time.deltaTime);
+        // --- 回転処理 ---
+        if (moveDirection != Vector3.zero)
+        {
+            // 回転には、すでに水平になったmoveDirectionをそのまま使える
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            playerModel.rotation = Quaternion.Slerp(playerModel.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
 
-        // レイの発射地点を「Davidの目」の位置に設定
+        // --- 最終的な移動量を返す ---
+        return moveDirection * currentSpeed;
+    }
+    void HandleInteraction()
+    {
         Vector3 rayOrigin = playerEyes.position;
-        // レイの方向を「メインカメラが向いている正面方向」に設定
         Vector3 rayDirection = Camera.main.transform.forward;
-
-        RaycastHit hit; // 当たったオブジェクトの情報を入れる変数
-
-        // 実際にレイを発射する
+        RaycastHit hit;
         if (Physics.Raycast(rayOrigin, rayDirection, out hit, interactDistance))
         {
-            if (Input.GetKeyDown(KeyCode.F))
+            if (hit.collider.CompareTag("Interactable") && Input.GetKeyDown(KeyCode.F))
             {
-                // 当たったオブジェクトから、それぞれのスクリプトを持っているか試す
                 TreasureBox treasure = hit.collider.GetComponent<TreasureBox>();
-                Van van = hit.collider.GetComponent<Van>();
+                if (treasure != null) treasure.OnInteract();
 
-                if (treasure != null) // もしTreasureBoxスクリプトを持っていたら
+                Van van = hit.collider.GetComponent<Van>();
+                if (van != null) van.OnInteract();
+            }
+        }
+    }
+    void HandleAttack()
+    {
+        // 左クリックが押された瞬間に攻撃
+        if (Input.GetMouseButtonDown(0))
+        {
+            // 1. 攻撃アニメーションを再生
+            animator.SetTrigger("Attack");
+
+            // 2. 攻撃範囲内にいる敵を探す
+            Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange);
+
+            // 3. 見つけた敵すべてにダメージを与える
+            foreach (Collider enemyCollider in hitEnemies)
+            {
+                // "Enemy"タグが付いているか確認
+                if (enemyCollider.CompareTag("Enemy"))
                 {
-                    treasure.OnInteract(); // 宝箱の機能（お金を拾う）を呼び出す
-                }
-                else if (van != null) // もしVanスクリプトを持っていたら
-                {
-                    van.OnInteract(); // バンの機能（お金を納品する）を呼び出す
+                    EnemyHealth enemyHealth = enemyCollider.GetComponent<EnemyHealth>();
+                    if (enemyHealth != null)
+                    {
+                        enemyHealth.TakeDamage(attackDamage);
+                    }
                 }
             }
         }
+    }
+
+    public void TakeDamage(int damage, Vector3 knockbackDirection)
+    {
+        currentHealth -= damage;
+        FindObjectOfType<GameManager>().UpdateHealthUI(currentHealth, maxHealth);
+        knockbackVelocity = knockbackDirection * knockbackForce;
+        if (currentHealth <= 0) Die();
+    }
+
+    private void Die()
+    {
+        Debug.Log("プレイヤーが力尽きた...");
+        FindObjectOfType<GameManager>().GameOver();
     }
 }

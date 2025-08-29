@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     public TextMeshProUGUI moneyText; // 所持金UIへの参照
     public TextMeshProUGUI deliveredMoneyText; // 納品総額UIへの参照（追加）
+    public TextMeshProUGUI healthText;
 
     void Start()
     {
@@ -35,5 +37,15 @@ public class GameManager : MonoBehaviour
     {
         moneyText.text = "Carrying: " + currentMoney.ToString();
         deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString();
+    }
+    public void GameOver()
+    {
+        Debug.Log("ゲームオーバー！");
+        // 現在アクティブなシーンをもう一度読み込む
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    public void UpdateHealthUI(int currentHealth, int maxHealth)
+    {
+        healthText.text = "HP: " + currentHealth.ToString() + " / " + maxHealth.ToString();
     }
 }
