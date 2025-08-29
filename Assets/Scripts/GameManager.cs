@@ -1,69 +1,130 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
+
     [Header("Money Settings")]
     public int currentMoney = 0;
     public int deliveredMoney = 0;
     public int moneyGoal = 500;
 
-    [Header("UI Settings")]
+    [Header("UI References (Scene-Specific)")]
+    // PlayerControllerから直接アクセスできるようにpublicに戻す
     public TextMeshProUGUI moneyText;
     public TextMeshProUGUI deliveredMoneyText;
     public TextMeshProUGUI healthText;
-    public GameObject missionCompleteScreen;
+    public CanvasGroup missionCompleteScreenCanvasGroup;
 
-    void Start()
-    {
-        missionCompleteScreen.SetActive(false); // 追加: ゲーム開始時にクリア画面を非表示
-        Time.timeScale = 1f; // 追加: ゲームの時間を通常速度に
-        UpdateMoneyUI();
-    }
+    [Header("Win Condition")]
+    public float timeSlowdownFactor = 0.2f;
+    public float fadeDuration = 1.5f;
+    public float waitBeforeReturn = 3.0f;
 
-    // お金を追加する（拾う）関数
-    public void AddMoney(int amount)
+    void Awake()
     {
-        currentMoney += amount;
-        UpdateMoneyUI();
-    }
-
-    // お金を納品する関数（追加）
-    public void DeliverMoney()
-    {
-        deliveredMoney += currentMoney; // 所持金を納品総額に加算
-        currentMoney = 0; // 所持金をリセット
-        UpdateMoneyUI(); // UIを更新
-        Debug.Log("納品完了！ 総額: " + deliveredMoney);
-        if (deliveredMoney >= moneyGoal)
+        if (instance == null)
         {
-            WinGame();
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
-    // UIのテキストを更新する関数
-    void UpdateMoneyUI()
+    // シーンがロードされるたびに呼ばれる関数
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        moneyText.text = "Carrying: " + currentMoney.ToString();
-        deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString();
+        // 新しいシーンでUI要素を毎回探しに行く
+        GameObject moneyTextObject = GameObject.Find("MoneyText");
+        if (moneyTextObject != null) moneyText = moneyTextObject.GetComponent<TextMeshProUGUI>();
+
+        GameObject deliveredMoneyTextObject = GameObject.Find("DeliveredMoneyText");
+        if (deliveredMoneyTextObject != null) deliveredMoneyText = deliveredMoneyTextObject.GetComponent<TextMeshProUGUI>();
+
+        GameObject healthTextObject = GameObject.Find("HP");
+        if (healthTextObject != null) healthText = healthTextObject.GetComponent<TextMeshProUGUI>();
+
+        GameObject missionCompleteScreenObject = GameObject.Find("MissionCompleteScreen");
+        if (missionCompleteScreenObject != null)
+        {
+            missionCompleteScreenCanvasGroup = missionCompleteScreenObject.GetComponent<CanvasGroup>();
+            if (missionCompleteScreenCanvasGroup != null)
+            {
+                missionCompleteScreenCanvasGroup.alpha = 0;
+            }
+        }
+        UpdateAllUI();
     }
-    void WinGame()
+    
+    // このスクリプトが破棄される時に呼ばれる
+    private void OnDestroy()
+    {
+        // イベントの登録を解除（メモリリークを防ぐための作法）
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    public void AddMoney(int amount)
+    {
+        currentMoney += amount;
+        UpdateAllUI();
+    }
+    
+    public void DeliverMoney()
+    {
+        deliveredMoney += currentMoney;
+        currentMoney = 0;
+        UpdateAllUI();
+        Debug.Log("納品完了！ 総額: " + deliveredMoney);
+
+        if (deliveredMoney >= moneyGoal)
+        {
+            StartCoroutine(WinSequenceCoroutine());
+        }
+    }
+
+    private IEnumerator WinSequenceCoroutine()
     {
         Debug.Log("ミッションコンプリート！");
-        missionCompleteScreen.SetActive(true); // クリア画面を表示
-        Time.timeScale = 0f; // ゲームの時間を停止
-        Cursor.lockState = CursorLockMode.None; // カーソルロックを解除
-        Cursor.visible = true; // カーソルを表示
+        Time.timeScale = timeSlowdownFactor;
+
+        float timer = 0;
+        while (timer < fadeDuration)
+        {
+            if (missionCompleteScreenCanvasGroup != null)
+            {
+                missionCompleteScreenCanvasGroup.alpha = Mathf.Lerp(0, 1, timer / fadeDuration);
+            }
+            timer += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (missionCompleteScreenCanvasGroup != null) missionCompleteScreenCanvasGroup.alpha = 1;
+
+        yield return new WaitForSecondsRealtime(waitBeforeReturn);
+        
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Garage");
     }
+
     public void GameOver()
     {
         Debug.Log("ゲームオーバー！");
-        // 現在アクティブなシーンをもう一度読み込む
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Time.timeScale = 1f; // 時間の停止を解除してからシーンをロードする
+        SceneManager.LoadScene("Garage"); // ゲームオーバーになったら拠点に戻る
     }
-    public void UpdateHealthUI(int currentHealth, int maxHealth)
+
+    // UI更新系をまとめる
+    public void UpdateAllUI()
     {
-        healthText.text = "HP: " + currentHealth.ToString() + " / " + maxHealth.ToString();
+        if (moneyText != null) moneyText.text = "Carrying: " + currentMoney.ToString();
+        if (deliveredMoneyText != null) deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString();
+        
+        // HP更新はPlayerControllerが自分で行うので、ここからは削除
     }
 }

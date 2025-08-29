@@ -2,15 +2,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // --- Public Variables ---
     [Header("Movement")]
     public float moveSpeed = 5.0f;
     public float dashSpeed = 10.0f;
-    public float rotationSpeed = 15.0f; // 回転を速くするため少し値を上げました
+    public float rotationSpeed = 15.0f;
 
     [Header("Jumping & Gravity")]
     public float jumpHeight = 1.2f;
-    public float gravity = -20f; // 少し重力を強くすると、よりキビキビ動きます
+    public float gravity = -20f;
     public Transform groundCheck;
     public float groundDistance = 0.2f;
     public LayerMask groundMask;
@@ -26,11 +25,10 @@ public class PlayerController : MonoBehaviour
     public float attackRange = 1.5f;
     public Transform attackPoint;
 
-    // --- Private Variables ---
     private CharacterController characterController;
     private Animator animator;
     private Transform mainCameraTransform;
-    private Transform playerModel; // ★追加: モデルのTransform
+    private Transform playerModel;
 
     private Vector3 playerVelocity;
     private Vector3 knockbackVelocity;
@@ -42,92 +40,72 @@ public class PlayerController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         mainCameraTransform = Camera.main.transform;
-
-        // ★修正点: Playerオブジェクトの直下にある見た目の親を見つける ★
-        // Animatorが付いているオブジェクトの親（つまり見た目の一番親）を取得するか、
-        // もしAnimatorがPlayer直下に付いているならそのままAnimatorのTransformを使う
-        if (animator.transform.parent != transform) // Animatorの親がPlayer自身でなければ
-        {
-            playerModel = animator.transform.parent; // Animatorの親を使う
-        }
-        else
-        {
-            playerModel = animator.transform; // Animator自体がPlayer直下ならそれを使う
-        }
-        // もしくは、AnimatorコンポーネントがアタッチされているGameObjectを探す
-        // playerModel = animator.gameObject.transform; // これでも良い場合があります
+        playerModel = animator.transform;
 
         currentHealth = maxHealth;
-        FindObjectOfType<GameManager>().UpdateHealthUI(currentHealth, maxHealth);
+        UpdateHealthUI(); // 自身のHP UIを更新
+        
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        // 1. 状態の更新（地面判定）
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && playerVelocity.y < 0)
         {
             playerVelocity.y = -2f;
         }
 
-        // --- 2. 移動量の計算 ---
-        Vector3 finalMove = HandleMovementAndRotation();
-        HandleInteraction();
-        HandleAttack();
+        Vector3 finalMove = Vector3.zero;
 
         if (knockbackVelocity.magnitude > 0.2f)
         {
             finalMove += knockbackVelocity;
             knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, 5f * Time.deltaTime);
         }
-        
-        // 3. 重力の適用
+        else
+        {
+            finalMove += HandleMovementAndRotation();
+            HandleInteraction();
+            HandleAttack();
+        }
+
         playerVelocity.y += gravity * Time.deltaTime;
         finalMove += playerVelocity;
         
-        // 4. 最終的な移動命令
         characterController.Move(finalMove * Time.deltaTime);
     }
+    
     private Vector3 HandleMovementAndRotation()
     {
-        // --- 入力と速度の計算 ---
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
         bool isDashing = Input.GetKey(KeyCode.LeftShift);
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
-
-        // --- 移動方向の計算 ---
+        
         Vector3 moveDirection = (mainCameraTransform.forward * verticalInput + mainCameraTransform.right * horizontalInput);
-        // 移動に使うベクトルからはY軸（上下）の情報を完全に抜き去る
         moveDirection.y = 0;
-        // 水平にした後で、長さを1に正規化する（これにより斜め移動でも速度が一定になる）
         moveDirection.Normalize();
 
-        // --- アニメーションの更新 ---
         float animationSpeed = new Vector2(horizontalInput, verticalInput).magnitude;
         animator.SetFloat("Speed", animationSpeed, 0.1f, Time.deltaTime);
 
-        // --- ジャンプ ---
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             animator.SetTrigger("Jump");
-            // playerVelocity.yに直接代入することで、ジャンプの連打を防ぐ
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
         }
 
-        // --- 回転処理 ---
         if (moveDirection != Vector3.zero)
         {
-            // 回転には、すでに水平になったmoveDirectionをそのまま使える
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             playerModel.rotation = Quaternion.Slerp(playerModel.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        // --- 最終的な移動量を返す ---
         return moveDirection * currentSpeed;
     }
+    
     void HandleInteraction()
     {
         Vector3 rayOrigin = playerEyes.position;
@@ -142,17 +120,21 @@ public class PlayerController : MonoBehaviour
 
                 Van van = hit.collider.GetComponent<Van>();
                 if (van != null) van.OnInteract();
+
+                MissionGiver missionGiver = hit.collider.GetComponent<MissionGiver>();
+                if (missionGiver != null) missionGiver.OnInteract();
             }
         }
     }
+    
     void HandleAttack()
     {
-        if (Input.GetMouseButtonDown(0))
+        // 攻撃硬直中などは攻撃できないようにする、などのロジックを後で追加できる
+        if (Input.GetMouseButtonDown(0) && isGrounded) // 地上にいる時だけ攻撃可能にする
         {
             animator.SetTrigger("Attack");
 
             Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange);
-
             foreach (Collider enemyCollider in hitEnemies)
             {
                 if (enemyCollider.CompareTag("Enemy"))
@@ -160,9 +142,7 @@ public class PlayerController : MonoBehaviour
                     EnemyHealth enemyHealth = enemyCollider.GetComponent<EnemyHealth>();
                     if (enemyHealth != null)
                     {
-                        // 追加: ノックバックの方向を計算（プレイヤーから敵へ）
                         Vector3 knockbackDirection = (enemyCollider.transform.position - transform.position).normalized;
-                        // 変更: 計算した方向をTakeDamage関数に渡す
                         enemyHealth.TakeDamage(attackDamage, knockbackDirection);
                     }
                 }
@@ -173,14 +153,25 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
         currentHealth -= damage;
-        FindObjectOfType<GameManager>().UpdateHealthUI(currentHealth, maxHealth);
+        UpdateHealthUI();
+        
         knockbackVelocity = knockbackDirection * knockbackForce;
+        
         if (currentHealth <= 0) Die();
+    }
+    
+    // 自身のHPが変動した時に、GameManagerが持つUIの参照を直接更新する
+    void UpdateHealthUI()
+    {
+        if (GameManager.instance != null && GameManager.instance.healthText != null)
+        {
+            GameManager.instance.healthText.text = "HP: " + currentHealth.ToString() + " / " + maxHealth.ToString();
+        }
     }
 
     private void Die()
     {
         Debug.Log("プレイヤーが力尽きた...");
-        FindObjectOfType<GameManager>().GameOver();
+        GameManager.instance.GameOver();
     }
 }
