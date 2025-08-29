@@ -4,16 +4,21 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public int currentMoney = 0; // 現在プレイヤーが"所持"しているお金
-    public int deliveredMoney = 0; // バンに"納品"した総額
+    [Header("Money Settings")]
+    public int currentMoney = 0;
+    public int deliveredMoney = 0;
     public int moneyGoal = 500;
 
-    public TextMeshProUGUI moneyText; // 所持金UIへの参照
-    public TextMeshProUGUI deliveredMoneyText; // 納品総額UIへの参照（追加）
+    [Header("UI Settings")]
+    public TextMeshProUGUI moneyText;
+    public TextMeshProUGUI deliveredMoneyText;
     public TextMeshProUGUI healthText;
+    public GameObject missionCompleteScreen;
 
     void Start()
     {
+        missionCompleteScreen.SetActive(false); // 追加: ゲーム開始時にクリア画面を非表示
+        Time.timeScale = 1f; // 追加: ゲームの時間を通常速度に
         UpdateMoneyUI();
     }
 
@@ -31,6 +36,10 @@ public class GameManager : MonoBehaviour
         currentMoney = 0; // 所持金をリセット
         UpdateMoneyUI(); // UIを更新
         Debug.Log("納品完了！ 総額: " + deliveredMoney);
+        if (deliveredMoney >= moneyGoal)
+        {
+            WinGame();
+        }
     }
 
     // UIのテキストを更新する関数
@@ -38,6 +47,14 @@ public class GameManager : MonoBehaviour
     {
         moneyText.text = "Carrying: " + currentMoney.ToString();
         deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString();
+    }
+    void WinGame()
+    {
+        Debug.Log("ミッションコンプリート！");
+        missionCompleteScreen.SetActive(true); // クリア画面を表示
+        Time.timeScale = 0f; // ゲームの時間を停止
+        Cursor.lockState = CursorLockMode.None; // カーソルロックを解除
+        Cursor.visible = true; // カーソルを表示
     }
     public void GameOver()
     {
