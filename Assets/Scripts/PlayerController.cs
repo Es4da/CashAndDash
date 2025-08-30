@@ -1,4 +1,6 @@
 using UnityEngine;
+using Cinemachine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -23,8 +25,9 @@ public class PlayerController : MonoBehaviour
     public float knockbackForce = 15f;
     public int attackDamage = 50;
     public float attackRange = 1.5f;
+    public CinemachineFreeLook freeLookCamera;
+    public float cameraStartAngleOffset = 180f;
     public Transform attackPoint;
-
     private CharacterController characterController;
     private Animator animator;
     private Transform mainCameraTransform;
@@ -42,9 +45,34 @@ public class PlayerController : MonoBehaviour
         mainCameraTransform = Camera.main.transform;
         playerModel = animator.transform;
 
-        currentHealth = maxHealth;
-        UpdateHealthUI(); // 自身のHP UIを更新
+        StartCoroutine(InitializePlayer());
+    }
+    private IEnumerator InitializePlayer()
+    {
+        // まず1フレームだけ待つ。これにより、他の全てのオブジェクトが準備完了するのを待つ。
+        yield return null; 
+
+        GameObject startPoint = GameObject.Find("PlayerStartPoint");
+        if (startPoint != null)
+        {
+            // 位置と回転をリセット
+            transform.position = startPoint.transform.position;
+            transform.rotation = startPoint.transform.rotation;
+            
+            // カメラの軸をリセット
+            if (freeLookCamera != null)
+            {
+                freeLookCamera.m_XAxis.Value = transform.eulerAngles.y + cameraStartAngleOffset;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("PlayerStartPointが見つかりませんでした。");
+        }
         
+        // 残りの初期化処理
+        currentHealth = maxHealth;
+        UpdateHealthUI();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

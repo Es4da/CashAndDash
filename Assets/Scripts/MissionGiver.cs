@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class MissionGiver : MonoBehaviour
 {
-    public string sceneNameToLoad = "SampleScene"; // ここにミッションシーンの名前を入れる
+    public string sceneNameToLoad = "Mission"; // ここにミッションシーンの名前を入れる
 
     public void OnInteract()
     {
