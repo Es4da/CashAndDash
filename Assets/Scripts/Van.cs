@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class Van : MonoBehaviour
 {
-    // プレイヤーから呼び出される関数
+    public AudioClip depositSfx;
     public void OnInteract()
     {
-        // GameManagerの納品機能を呼び出す
-        FindObjectOfType<GameManager>().DeliverMoney();
+        if (GameManager.instance.currentMoney > 0 && depositSfx != null)
+        {
+            AudioManager.instance.PlaySfx(depositSfx);
+        }
+        GameManager.instance.DeliverMoney();
     }
 }

@@ -36,6 +36,10 @@ public class GameManager : MonoBehaviour
     private List<TreasureBox> allTreasureBoxes;
     private Coroutine unlockCoroutine;
 
+    [Header("Audio")]
+    public AudioClip missionCompleteSfx;
+    public AudioClip gameOverSfx;
+
     void Awake()
     {
         if (instance == null)
@@ -61,6 +65,7 @@ public class GameManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        AudioManager.instance.SetCutsceneMode(false);
         // 先に目標金額を設定する
         if (scene.name == missionSceneName)
         {
@@ -176,6 +181,14 @@ public class GameManager : MonoBehaviour
     private IEnumerator WinSequenceCoroutine()
     {
         Debug.Log("ミッションコンプリート！");
+        AudioManager.instance.StopBgm();
+        PlayerController player = FindObjectOfType<PlayerController>();
+        if (player != null)
+        {
+            player.StopFootsteps();
+        }
+        AudioManager.instance.SetCutsceneMode(true);
+        AudioManager.instance.PlayCutsceneSfx(missionCompleteSfx);
         Time.timeScale = timeSlowdownFactor;
         
         float timer = 0;
@@ -201,6 +214,7 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Debug.Log("ゲームオーバー！進行状況をリセットします...");
+        AudioManager.instance.PlaySfx(gameOverSfx);
         Time.timeScale = 1f;
         
         // ★変更点: ラウンドと累計スコアをリセット

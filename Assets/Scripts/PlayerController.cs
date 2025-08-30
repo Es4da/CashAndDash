@@ -37,6 +37,12 @@ public class PlayerController : MonoBehaviour
     private Vector3 knockbackVelocity;
     private bool isGrounded;
     private int currentHealth;
+    private AudioSource footstepSource;
+
+    [Header("Audio")]
+    public AudioClip attackSfx;
+    public AudioClip hitSfx;
+    public AudioClip jumpSfx;
 
     void Start()
     {
@@ -46,6 +52,7 @@ public class PlayerController : MonoBehaviour
         playerModel = animator.transform;
 
         StartCoroutine(InitializePlayer());
+        footstepSource = GetComponent<AudioSource>();
     }
     private IEnumerator InitializePlayer()
     {
@@ -85,24 +92,67 @@ public class PlayerController : MonoBehaviour
             playerVelocity.y = -2f;
         }
 
-        Vector3 finalMove = Vector3.zero;
+        // 常にプレイヤーの入力を受け付ける
+        Vector3 finalMove = HandleMovementAndRotation();
+        HandleInteraction();
+        HandleAttack();
 
+        // ノックバックの勢いが残っていれば、それを移動量に「加算」する
         if (knockbackVelocity.magnitude > 0.2f)
         {
             finalMove += knockbackVelocity;
             knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, 5f * Time.deltaTime);
         }
-        else
-        {
-            finalMove += HandleMovementAndRotation();
-            HandleInteraction();
-            HandleAttack();
-        }
 
+        // 重力を適用
         playerVelocity.y += gravity * Time.deltaTime;
         finalMove += playerVelocity;
-        
+
+        // 最終的な移動命令
         characterController.Move(finalMove * Time.deltaTime);
+        HandleFootsteps();
+    }
+    void HandleFootsteps()
+    {
+        // ★★★ ここからが最重要修正点 ★★★
+        // もしAudioManagerが演出モードなら
+        if (AudioManager.instance.isCutsceneMode)
+        {
+            // 足音は絶対に止める
+            if (footstepSource.isPlaying)
+            {
+                footstepSource.Stop();
+            }
+            return; // そして、以降の処理は一切しない
+        }
+        // ★★★ ここまで ★★★
+
+        // 地面にいて、かつ水平方向の速度が少しでもあれば
+        if (isGrounded && new Vector3(characterController.velocity.x, 0, characterController.velocity.z).magnitude > 0.1f)
+        {
+            // もし足音が再生されていなければ
+            if (!footstepSource.isPlaying)
+            {
+                // 再生を開始する
+                footstepSource.Play();
+            }
+        }
+        else
+        {
+            // 上の条件を満たさない場合（空中にいる、または止まっている）
+            if (footstepSource.isPlaying)
+            {
+                // 再生を停止する
+                footstepSource.Stop();
+            }
+        }
+}
+    public void StopFootsteps()
+    {
+        if (footstepSource != null && footstepSource.isPlaying)
+        {
+            footstepSource.Stop();
+        }
     }
     
     private Vector3 HandleMovementAndRotation()
@@ -111,7 +161,7 @@ public class PlayerController : MonoBehaviour
         float verticalInput = Input.GetAxisRaw("Vertical");
         bool isDashing = Input.GetKey(KeyCode.LeftShift);
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
-        
+
         Vector3 moveDirection = (mainCameraTransform.forward * verticalInput + mainCameraTransform.right * horizontalInput);
         moveDirection.y = 0;
         moveDirection.Normalize();
@@ -122,6 +172,7 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             animator.SetTrigger("Jump");
+            AudioManager.instance.PlaySfx(jumpSfx);
             playerVelocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
         }
 
@@ -161,6 +212,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && isGrounded) // 地上にいる時だけ攻撃可能にする
         {
             animator.SetTrigger("Attack");
+            if (attackSfx != null)
+            {
+                AudioManager.instance.PlaySfx(attackSfx);
+            }
 
             Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange);
             foreach (Collider enemyCollider in hitEnemies)
@@ -181,6 +236,7 @@ public class PlayerController : MonoBehaviour
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
         currentHealth -= damage;
+        AudioManager.instance.PlaySfx(hitSfx);
         UpdateHealthUI();
         
         knockbackVelocity = knockbackDirection * knockbackForce;

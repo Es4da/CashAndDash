@@ -3,6 +3,7 @@ using UnityEngine;
 public class TreasureBox : MonoBehaviour
 {
     public int moneyValue = 100;
+    public AudioClip collectSfx;
 
     private Collider boxCollider; // 追加: 当たり判定への参照
     private MeshRenderer meshRenderer; // 追加: 見た目への参照
@@ -20,6 +21,7 @@ public class TreasureBox : MonoBehaviour
     // プレイヤーから呼び出される関数
     public void OnInteract()
     {
+        AudioManager.instance.PlaySfx(collectSfx);
         GameManager.instance.AddMoney(moneyValue);
         Destroy(gameObject);
     }

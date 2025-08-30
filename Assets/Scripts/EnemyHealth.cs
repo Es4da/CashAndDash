@@ -7,6 +7,7 @@ public class EnemyHealth : MonoBehaviour
     public int maxHealth = 100;
     public float knockbackForce = 10f; // 追加: 敵のノックバックの強さ
     public float knockbackDuration = 0.3f; // 追加: 敵のノックバックの時間
+    public AudioClip hitSfx;
 
     private int currentHealth;
     private NavMeshAgent agent; // 追加: NavMeshAgentへの参照
@@ -20,6 +21,10 @@ public class EnemyHealth : MonoBehaviour
     // 変更: knockbackDirectionを受け取れるようにする
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
+        if (hitSfx != null)
+        {
+            AudioManager.instance.PlaySfx(hitSfx);
+        }
         currentHealth -= damage;
         Debug.Log(gameObject.name + "が" + damage + "ダメージを受けた！ 残りHP: " + currentHealth);
 
