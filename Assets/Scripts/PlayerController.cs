@@ -21,7 +21,6 @@ public class PlayerController : MonoBehaviour
     public Transform playerEyes;
 
     [Header("Combat")]
-    public int maxHealth = 100;
     public float knockbackForce = 15f;
     public int attackDamage = 50;
     public float attackRange = 1.5f;
@@ -33,11 +32,11 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private Transform mainCameraTransform;
     private Transform playerModel;
+    private bool isDead = false;
 
     private Vector3 playerVelocity;
     private Vector3 knockbackVelocity;
     private bool isGrounded;
-    private int currentHealth;
     private AudioSource footstepSource;
     private float currentAttackCooldown = 0f;
 
@@ -59,7 +58,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator InitializePlayer()
     {
         // まず1フレームだけ待つ。これにより、他の全てのオブジェクトが準備完了するのを待つ。
-        yield return null; 
+        yield return null;
 
         GameObject startPoint = GameObject.Find("PlayerStartPoint");
         if (startPoint != null)
@@ -67,7 +66,7 @@ public class PlayerController : MonoBehaviour
             // 位置と回転をリセット
             transform.position = startPoint.transform.position;
             transform.rotation = startPoint.transform.rotation;
-            
+
             // カメラの軸をリセット
             if (freeLookCamera != null)
             {
@@ -78,9 +77,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("PlayerStartPointが見つかりませんでした。");
         }
-        
-        // 残りの初期化処理
-        currentHealth = maxHealth;
+
         UpdateHealthUI();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -88,6 +85,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (isDead) return;
         if (currentAttackCooldown > 0)
         {
             currentAttackCooldown -= Time.deltaTime;
@@ -152,7 +150,7 @@ public class PlayerController : MonoBehaviour
                 footstepSource.Stop();
             }
         }
-}
+    }
     public void StopFootsteps()
     {
         if (footstepSource != null && footstepSource.isPlaying)
@@ -160,7 +158,7 @@ public class PlayerController : MonoBehaviour
             footstepSource.Stop();
         }
     }
-    
+
     private Vector3 HandleMovementAndRotation()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -190,7 +188,7 @@ public class PlayerController : MonoBehaviour
 
         return moveDirection * currentSpeed;
     }
-    
+
     void HandleInteraction()
     {
         Vector3 rayOrigin = playerEyes.position;
@@ -211,7 +209,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    
+
     void HandleAttack()
     {
         // 攻撃硬直中などは攻撃できないようにする、などのロジックを後で追加できる
@@ -242,27 +240,46 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
-        currentHealth -= damage;
+        GameManager.instance.playerCurrentHealth -= damage;
         AudioManager.instance.PlaySfx(hitSfx);
         UpdateHealthUI();
-        
+
         knockbackVelocity = knockbackDirection * knockbackForce;
-        
-        if (currentHealth <= 0) Die();
+
+        if (GameManager.instance.playerCurrentHealth <= 0) Die();
     }
-    
+
     // 自身のHPが変動した時に、GameManagerが持つUIの参照を直接更新する
     public void UpdateHealthUI()
     {
         if (GameManager.instance != null && GameManager.instance.healthText != null)
         {
-            GameManager.instance.healthText.text = "HP: " + currentHealth.ToString() + " / " + maxHealth.ToString();
+            GameManager.instance.healthText.text = "HP: " + GameManager.instance.playerCurrentHealth + " / " + GameManager.instance.playerMaxHealth;
         }
     }
 
     private void Die()
     {
+        if (isDead) return;
+        isDead = true;
         Debug.Log("プレイヤーが力尽きた...");
         GameManager.instance.GameOver();
+    }
+    public void TriggerDeathAnimation()
+    {
+        animator.SetTrigger("Die");
+    }
+    void OnDrawGizmosSelected()
+    {
+        // attackPointが設定されていないとエラーになるので、チェックする
+        if (attackPoint == null)
+        {
+            return;
+        }
+
+        // Gizmoの色を赤に設定
+        Gizmos.color = Color.red;
+        // attackPointの位置に、attackRangeを半径としたワイヤーフレームの球体を描画
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 }

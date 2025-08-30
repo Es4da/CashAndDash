@@ -11,6 +11,10 @@ public class GameManager : MonoBehaviour
     public static int currentRound = 1;
     public static int totalScore = 0;
 
+    [Header("Player Stats (Persistent)")] // ★追加
+    public int playerMaxHealth = 100;    // ★追加
+    public int playerCurrentHealth;
+
     [Header("Mission Gameplay")]
     public int currentMoney = 0;
     public int deliveredMoney = 0;
@@ -22,6 +26,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI healthText;
     public TextMeshProUGUI totalScoreText;
     public CanvasGroup missionCompleteScreenCanvasGroup;
+    public CanvasGroup gameOverScreenCanvasGroup;
 
     [Header("Win/Loss Settings")]
     public float timeSlowdownFactor = 0.2f;
@@ -46,6 +51,8 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            playerCurrentHealth = playerMaxHealth;
         }
         else if (instance != this)
         {
@@ -97,9 +104,11 @@ public class GameManager : MonoBehaviour
 
             GameObject mcsObject = GameObject.Find("MissionCompleteScreen");
             if (mcsObject != null) missionCompleteScreenCanvasGroup = mcsObject.GetComponent<CanvasGroup>();
-            
+
             deliveredMoney = 0;
             currentMoney = 0;
+            GameObject goScreenObject = GameObject.Find("GameOverScreen"); // ★追加
+            if (goScreenObject != null) gameOverScreenCanvasGroup = goScreenObject.GetComponent<CanvasGroup>();
         }
         else if (sceneName == hubSceneName)
         {
@@ -122,7 +131,7 @@ public class GameManager : MonoBehaviour
         }
         Debug.Log("Round " + currentRound + " Start! Goal: " + moneyGoal);
     }
-    
+
     void InitializeTreasureBoxes()
     {
         if (unlockCoroutine != null)
@@ -147,14 +156,14 @@ public class GameManager : MonoBehaviour
             inactiveBoxes[randomIndex].Activate();
             Debug.Log(inactiveBoxes[randomIndex].name + " がアンロックされました！");
             inactiveBoxes.RemoveAt(randomIndex);
-            
-            if(inactiveBoxes.Count > 0)
+
+            if (inactiveBoxes.Count > 0)
             {
                 yield return new WaitForSeconds(subsequentUnlockInterval);
             }
         }
     }
-    
+
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -165,7 +174,7 @@ public class GameManager : MonoBehaviour
         currentMoney += amount;
         UpdateAllUI(SceneManager.GetActiveScene().name);
     }
-    
+
     public void DeliverMoney()
     {
         deliveredMoney += currentMoney;
@@ -190,7 +199,7 @@ public class GameManager : MonoBehaviour
         AudioManager.instance.SetCutsceneMode(true);
         AudioManager.instance.PlayCutsceneSfx(missionCompleteSfx);
         Time.timeScale = timeSlowdownFactor;
-        
+
         float timer = 0;
         while (timer < fadeDuration)
         {
@@ -204,7 +213,7 @@ public class GameManager : MonoBehaviour
         if (missionCompleteScreenCanvasGroup != null) missionCompleteScreenCanvasGroup.alpha = 1;
 
         yield return new WaitForSecondsRealtime(waitBeforeReturn);
-        
+
         totalScore += deliveredMoney;
         currentRound++;
         Time.timeScale = 1f;
@@ -213,15 +222,7 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        Debug.Log("ゲームオーバー！進行状況をリセットします...");
-        AudioManager.instance.PlaySfx(gameOverSfx);
-        Time.timeScale = 1f;
-        
-        // ★変更点: ラウンドと累計スコアをリセット
-        currentRound = 1;
-        totalScore = 0;
-        
-        SceneManager.LoadScene(hubSceneName);
+        StartCoroutine(GameOverSequenceCoroutine());
     }
 
     public void UpdateAllUI(string sceneName)
@@ -229,10 +230,10 @@ public class GameManager : MonoBehaviour
         if (sceneName == missionSceneName)
         {
             if (moneyText != null) moneyText.text = "Carrying: " + currentMoney.ToString();
-            
+
             // ★変更点: ノルマ表示を追加
             if (deliveredMoneyText != null) deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString() + " / " + moneyGoal.ToString();
-        
+
             PlayerController player = FindObjectOfType<PlayerController>();
             if (player != null) player.UpdateHealthUI();
         }
@@ -240,5 +241,38 @@ public class GameManager : MonoBehaviour
         {
             if (totalScoreText != null) totalScoreText.text = "Total Score: " + totalScore.ToString();
         }
+    }
+    private IEnumerator GameOverSequenceCoroutine()
+    {
+        Debug.Log("ゲームオーバー！");
+        FindObjectOfType<PlayerController>()?.TriggerDeathAnimation(); // プレイヤーに死亡アニメ再生を命令
+
+        AudioManager.instance.SetCutsceneMode(true);
+        AudioManager.instance.StopBgm();
+        AudioManager.instance.PlayCutsceneSfx(gameOverSfx);
+
+        Time.timeScale = timeSlowdownFactor;
+
+        float timer = 0;
+        while (timer < fadeDuration)
+        {
+            if (gameOverScreenCanvasGroup != null)
+            {
+                gameOverScreenCanvasGroup.alpha = Mathf.Lerp(0, 1, timer / fadeDuration);
+            }
+            timer += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (gameOverScreenCanvasGroup != null) gameOverScreenCanvasGroup.alpha = 1;
+
+        yield return new WaitForSecondsRealtime(waitBeforeReturn);
+
+        // 進行状況をリセット
+        currentRound = 1;
+        totalScore = 0;
+        playerCurrentHealth = playerMaxHealth;
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(hubSceneName);
     }
 }
