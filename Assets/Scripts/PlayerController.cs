@@ -189,7 +189,7 @@ public class PlayerController : MonoBehaviour
     }
     
     // 自身のHPが変動した時に、GameManagerが持つUIの参照を直接更新する
-    void UpdateHealthUI()
+    public void UpdateHealthUI()
     {
         if (GameManager.instance != null && GameManager.instance.healthText != null)
         {

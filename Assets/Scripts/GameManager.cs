@@ -6,14 +6,15 @@ using System.Collections;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    public static int currentRound = 1;
 
     [Header("Money Settings")]
     public int currentMoney = 0;
     public int deliveredMoney = 0;
-    public int moneyGoal = 500;
+    public int moneyGoal; // ラウンド毎に自動設定
 
     [Header("UI References (Scene-Specific)")]
-    // PlayerControllerから直接アクセスできるようにpublicに戻す
+    // これらはシーン移動時に自動で検索されます
     public TextMeshProUGUI moneyText;
     public TextMeshProUGUI deliveredMoneyText;
     public TextMeshProUGUI healthText;
@@ -38,10 +39,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // シーンがロードされるたびに呼ばれる関数
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // 新しいシーンでUI要素を毎回探しに行く
+        FindSceneUI();
+
+        // ミッションシーンがロードされた時だけ、目標を設定
+        if (scene.name == "SampleScene") // あなたのミッションシーンの名前に合わせてください
+        {
+            SetMissionGoal();
+        }
+    }
+
+    void FindSceneUI()
+    {
+        // UI要素を毎回探しに行く
         GameObject moneyTextObject = GameObject.Find("MoneyText");
         if (moneyTextObject != null) moneyText = moneyTextObject.GetComponent<TextMeshProUGUI>();
 
@@ -63,10 +74,22 @@ public class GameManager : MonoBehaviour
         UpdateAllUI();
     }
     
-    // このスクリプトが破棄される時に呼ばれる
+    void SetMissionGoal()
+    {
+        switch (currentRound)
+        {
+            case 1: moneyGoal = 100; break;
+            case 2: moneyGoal = 200; break;
+            case 3: moneyGoal = 300; break;
+            case 4: moneyGoal = 400; break;
+            default: moneyGoal = 500; break;
+        }
+        Debug.Log("Round " + currentRound + " Start! Goal: " + moneyGoal);
+    }
+    
     private void OnDestroy()
     {
-        // イベントの登録を解除（メモリリークを防ぐための作法）
+        // イベントの登録を解除
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -81,7 +104,6 @@ public class GameManager : MonoBehaviour
         deliveredMoney += currentMoney;
         currentMoney = 0;
         UpdateAllUI();
-        Debug.Log("納品完了！ 総額: " + deliveredMoney);
 
         if (deliveredMoney >= moneyGoal)
         {
@@ -108,23 +130,30 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(waitBeforeReturn);
         
+        currentRound++; // ラウンド数を増やす
         Time.timeScale = 1f;
         SceneManager.LoadScene("Garage");
     }
 
     public void GameOver()
     {
-        Debug.Log("ゲームオーバー！");
-        Time.timeScale = 1f; // 時間の停止を解除してからシーンをロードする
-        SceneManager.LoadScene("Garage"); // ゲームオーバーになったら拠点に戻る
+        Debug.Log("ゲームオーバー！拠点に戻ります...");
+        Time.timeScale = 1f;
+        // ゲームオーバー時はラウンド数をリセットするなどの処理もここに追加できる
+        // currentRound = 1; 
+        SceneManager.LoadScene("Garage");
     }
 
-    // UI更新系をまとめる
     public void UpdateAllUI()
     {
         if (moneyText != null) moneyText.text = "Carrying: " + currentMoney.ToString();
         if (deliveredMoneyText != null) deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString();
         
-        // HP更新はPlayerControllerが自分で行うので、ここからは削除
+        // PlayerControllerを探してHP更新を依頼する
+        PlayerController player = FindObjectOfType<PlayerController>();
+        if (player != null)
+        {
+            player.UpdateHealthUI();
+        }
     }
 }
