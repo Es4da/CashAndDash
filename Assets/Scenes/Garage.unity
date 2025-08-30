@@ -1700,7 +1700,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1528697412}
-  m_LocalRotation: {x: 0.19070153, y: -0.5428009, z: 0.12813792, w: 0.8078248}
+  m_LocalRotation: {x: 0.19070154, y: -0.54280084, z: 0.12813787, w: 0.80782485}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1725,6 +1725,10 @@ PrefabInstance:
       propertyPath: missionBgm
       value: 
       objectReference: {fileID: 8300000, guid: 24f8c20904148f246b084b6ced6cf6f1, type: 3}
+    - target: {fileID: 2543358990236679321, guid: 6686e72e4e4bad6478185cb19c9eec5a, type: 3}
+      propertyPath: m_Volume
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 6889199910795984638, guid: 6686e72e4e4bad6478185cb19c9eec5a, type: 3}
       propertyPath: m_RootOrder
       value: 10

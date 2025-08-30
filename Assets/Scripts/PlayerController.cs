@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     public float knockbackForce = 15f;
     public int attackDamage = 50;
     public float attackRange = 1.5f;
+    public float attackCooldown = 1f;
     public CinemachineFreeLook freeLookCamera;
     public float cameraStartAngleOffset = 180f;
     public Transform attackPoint;
@@ -38,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private int currentHealth;
     private AudioSource footstepSource;
+    private float currentAttackCooldown = 0f;
 
     [Header("Audio")]
     public AudioClip attackSfx;
@@ -86,6 +88,10 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (currentAttackCooldown > 0)
+        {
+            currentAttackCooldown -= Time.deltaTime;
+        }
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && playerVelocity.y < 0)
         {
@@ -209,8 +215,9 @@ public class PlayerController : MonoBehaviour
     void HandleAttack()
     {
         // 攻撃硬直中などは攻撃できないようにする、などのロジックを後で追加できる
-        if (Input.GetMouseButtonDown(0) && isGrounded) // 地上にいる時だけ攻撃可能にする
+        if (Input.GetMouseButtonDown(0) && isGrounded && currentAttackCooldown <= 0) // 地上にいる時だけ攻撃可能にする
         {
+            currentAttackCooldown = attackCooldown;
             animator.SetTrigger("Attack");
             if (attackSfx != null)
             {
