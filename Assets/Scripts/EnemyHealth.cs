@@ -21,6 +21,7 @@ public class EnemyHealth : MonoBehaviour
     // 変更: knockbackDirectionを受け取れるようにする
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
+        GameManager.instance.DoHitStop(0.1f);
         if (hitSfx != null)
         {
             AudioManager.instance.PlaySfx(hitSfx);

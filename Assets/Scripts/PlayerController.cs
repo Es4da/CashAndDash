@@ -272,6 +272,7 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
+        GameManager.instance.DoHitStop(0.2f);
         GameManager.instance.playerCurrentHealth -= damage;
         AudioManager.instance.PlaySfx(hitSfx);
         UpdateHealthUI();

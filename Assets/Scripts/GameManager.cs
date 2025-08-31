@@ -215,6 +215,21 @@ public class GameManager : MonoBehaviour
             StartCoroutine(WinSequenceCoroutine());
         }
     }
+    public void DoHitStop(float duration)
+    {
+        StartCoroutine(HitStopCoroutine(duration));
+    }
+    private IEnumerator HitStopCoroutine(float duration)
+    {
+        Time.timeScale = 0.1f; // 時間をスローに
+        yield return new WaitForSecondsRealtime(duration); // 指定時間、現実時間で待つ
+        // 勝利演出中でなければ、時間を元に戻す
+        if (Time.timeScale < 0.5f) // スロー演出中でないことを確認
+        {
+             Time.timeScale = 1f;
+        }
+    }
+
 
     private IEnumerator WinSequenceCoroutine()
     {
