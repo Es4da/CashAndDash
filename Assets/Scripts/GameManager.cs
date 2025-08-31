@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     public static int currentRound = 1;
     public static int totalScore = 0;
+    public bool isPlayerInvincible = false;
 
     [Header("Player Stats (Persistent)")]
     public int playerMaxHealth = 100;
@@ -46,6 +47,8 @@ public class GameManager : MonoBehaviour
 
     private List<TreasureBox> allTreasureBoxes;
     private Coroutine unlockCoroutine;
+    private RectTransform notificationPanel; // ★追加
+    private TextMeshProUGUI notificationText; // ★追加
 
     void Awake()
     {
@@ -97,6 +100,7 @@ public class GameManager : MonoBehaviour
         
         if (scene.name == missionSceneName)
         {
+            isPlayerInvincible = false;
             SetMissionGoal();
             InitializeStartPoint();
             InitializeTreasureBoxes();
@@ -107,34 +111,87 @@ public class GameManager : MonoBehaviour
 
     void FindSceneUI(string sceneName)
     {
-        // まず、どのシーンにも共通で存在する可能性があるものを探す
-        fadePanelCanvasGroup = GameObject.Find("FadePanel")?.GetComponent<CanvasGroup>();
+        // まず、シーンに存在するCanvasを探す
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            // Canvas自体が見つからなければ、UIは探せない
+            Debug.LogWarning("UI Canvas could not be found in the scene.");
+            return;
+        }
 
-        // シーン名に応じて、探す対象を分岐させる
+        // Canvasの子供の中から、必要なUIコンポーネントを探し出す
+        // transform.Find()は、非アクティブな子オブジェクトも探すことができる
         if (sceneName == missionSceneName)
         {
-            // --- Missionシーンにしか存在しないUI ---
-            moneyText = GameObject.Find("MoneyText")?.GetComponent<TextMeshProUGUI>();
-            deliveredMoneyText = GameObject.Find("DeliveredMoneyText")?.GetComponent<TextMeshProUGUI>();
-            healthText = GameObject.Find("HP")?.GetComponent<TextMeshProUGUI>();
-            missionCompleteScreenCanvasGroup = GameObject.Find("MissionCompleteScreen")?.GetComponent<CanvasGroup>();
-            gameOverScreenCanvasGroup = GameObject.Find("GameOverScreen")?.GetComponent<CanvasGroup>();
-            staminaBar = GameObject.Find("StaminaBar")?.GetComponent<Slider>();
-            
-            // ミッション開始時にスコアをリセット
+            moneyText = canvas.transform.Find("MoneyText")?.GetComponent<TextMeshProUGUI>();
+            deliveredMoneyText = canvas.transform.Find("DeliveredMoneyText")?.GetComponent<TextMeshProUGUI>();
+            healthText = canvas.transform.Find("HP")?.GetComponent<TextMeshProUGUI>();
+            missionCompleteScreenCanvasGroup = canvas.transform.Find("MissionCompleteScreen")?.GetComponent<CanvasGroup>();
+            gameOverScreenCanvasGroup = canvas.transform.Find("GameOverScreen")?.GetComponent<CanvasGroup>();
+            staminaBar = canvas.transform.Find("StaminaBar")?.GetComponent<Slider>();
+
             deliveredMoney = 0;
             currentMoney = 0;
+            Transform notificationTransform = canvas.transform.Find("NotificationPanel");
+            if (notificationTransform != null)
+            {
+                notificationPanel = notificationTransform.GetComponent<RectTransform>();
+                notificationText = notificationPanel.GetComponentInChildren<TextMeshProUGUI>();
+                notificationPanel.gameObject.SetActive(false); // 確実に非表示から始める
+            }
         }
         else if (sceneName == hubSceneName)
         {
-            // --- Garageシーンにしか存在しないUI ---
-            totalScoreText = GameObject.Find("TotalScoreText")?.GetComponent<TextMeshProUGUI>();
+            totalScoreText = canvas.transform.Find("TotalScoreText")?.GetComponent<TextMeshProUGUI>();
         }
 
-        // 最後に、見つかったUIだけを更新する
+        // FadePanelは両方のシーンにある可能性があるので、ここで探す
+        fadePanelCanvasGroup = canvas.transform.Find("FadePanel")?.GetComponent<CanvasGroup>();
+
+        // UIの初期表示を更新
         UpdateAllUI(sceneName);
     }
-    
+
+    public void ShowNotification(string message)
+    {
+        StartCoroutine(NotificationCoroutine(message));
+    }
+
+    // ★追加: 通知の表示・非表示アニメーションを制御するコルーチン
+    private IEnumerator NotificationCoroutine(string message)
+    {
+        if (notificationPanel == null) yield break;
+
+        // --- 1. スライドイン ---
+        notificationPanel.gameObject.SetActive(true);
+        notificationText.text = message;
+        
+        Vector2 startPos = new Vector2(400, 50); // 画面外右下（仮）
+        Vector2 onScreenPos = new Vector2(-50, 50); // 画面内右下（仮）
+        float timer = 0f;
+        while(timer < 0.5f) // 0.5秒かけてスライドイン
+        {
+            notificationPanel.anchoredPosition = Vector2.Lerp(startPos, onScreenPos, timer / 0.5f);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        notificationPanel.anchoredPosition = onScreenPos;
+
+        // --- 2. 3秒間表示 ---
+        yield return new WaitForSeconds(3f);
+
+        // --- 3. スライドアウト ---
+        timer = 0f;
+        while(timer < 0.5f) // 0.5秒かけてスライドアウト
+        {
+            notificationPanel.anchoredPosition = Vector2.Lerp(onScreenPos, startPos, timer / 0.5f);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        notificationPanel.gameObject.SetActive(false);
+    }
+
     public void LoadSceneWithFade(string sceneName)
     {
         StartCoroutine(LoadSceneCoroutine(sceneName));
@@ -193,6 +250,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator WinSequenceCoroutine()
     {
         Debug.Log("ミッションコンプリート！");
+        isPlayerInvincible = true;
         AudioManager.instance.StopBgm();
         FindObjectOfType<PlayerController>()?.StopFootsteps();
         AudioManager.instance.SetCutsceneMode(true);
@@ -217,6 +275,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator GameOverSequenceCoroutine()
     {
         Debug.Log("ゲームオーバー！");
+        isPlayerInvincible = true;
         FindObjectOfType<PlayerController>()?.TriggerDeathAnimation();
 
         AudioManager.instance.SetCutsceneMode(true);
@@ -331,6 +390,7 @@ public class GameManager : MonoBehaviour
         {
             int randomIndex = Random.Range(0, inactiveBoxes.Count);
             inactiveBoxes[randomIndex].Activate();
+            ShowNotification("A New Box Has Unlocked!");
             inactiveBoxes.RemoveAt(randomIndex);
             
             if(inactiveBoxes.Count > 0)
@@ -351,6 +411,10 @@ public class GameManager : MonoBehaviour
         float originalTimeScale = Time.timeScale;
         Time.timeScale = 0.1f;
         yield return new WaitForSecondsRealtime(duration);
-        Time.timeScale = originalTimeScale;
+        if (!AudioManager.instance.isCutsceneMode)
+        {
+            Time.timeScale = originalTimeScale;
+        }
     }
+    
 }

@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class AudioManager : MonoBehaviour
 {
@@ -8,10 +10,16 @@ public class AudioManager : MonoBehaviour
     [Header("Audio Sources")]
     public AudioSource sfxSource; // 効果音用のAudioSource
     public AudioSource bgmSource; // BGM用のAudioSource
+    [Header("Audio Mixer")]
+    public AudioMixer mainMixer;
     [Header("BGM Clips")]
     public AudioClip garageBgm;   // ガレージシーンで流すBGM
     public AudioClip missionBgm;  // ミッションシーンで流すBGM
     public bool isCutsceneMode = false;
+
+    private Slider bgmSlider;
+    private Slider sfxSlider;
+    
 
     void Awake()
     {
@@ -23,6 +31,44 @@ public class AudioManager : MonoBehaviour
         else if (instance != this)
         {
             Destroy(gameObject);
+        }
+    }
+    void Start()
+    {
+        float bgmVol = PlayerPrefs.GetFloat("BgmVolume", 0.5f);
+        SetBgmVolume(bgmVol);
+        
+        float sfxVol = PlayerPrefs.GetFloat("SfxVolume", 0.5f);
+        SetSfxVolume(sfxVol);
+    }
+    public void SetBgmVolume(float volume)
+    {
+        // スライダーの値(0.0001～1)を、デシベル(-80～0)に変換してAudioMixerに設定
+        mainMixer.SetFloat("BgmVolume", Mathf.Log10(volume) * 20);
+        // 設定をPlayerPrefsに保存
+        PlayerPrefs.SetFloat("BgmVolume", volume);
+    }
+    
+    // SFX音量を設定する公開関数
+    public void SetSfxVolume(float volume)
+    {
+        mainMixer.SetFloat("SfxVolume", Mathf.Log10(volume) * 20);
+        PlayerPrefs.SetFloat("SfxVolume", volume);
+    }
+    public void FindAndSetSliders()
+    {
+        GameObject bgmSliderObject = GameObject.Find("BgmSlider");
+        if (bgmSliderObject != null)
+        {
+            bgmSlider = bgmSliderObject.GetComponent<Slider>();
+            bgmSlider.value = PlayerPrefs.GetFloat("BgmVolume", 0.5f);
+        }
+
+        GameObject sfxSliderObject = GameObject.Find("SfxSlider");
+        if (sfxSliderObject != null)
+        {
+            sfxSlider = sfxSliderObject.GetComponent<Slider>();
+            sfxSlider.value = PlayerPrefs.GetFloat("SfxVolume", 0.5f);
         }
     }
     private void OnEnable()

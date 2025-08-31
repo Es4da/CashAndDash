@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.SceneManagement; // ゲーム終了（ビルド時）に必要
+using TMPro;
 
 public class PauseMenuManager : MonoBehaviour
 {
     public GameObject pauseMenuUI; // インスペクターからポーズ画面のPanelを設定
+    public TextMeshProUGUI highScoreText;
     public static bool isPaused = false;
 
     void Start()
@@ -45,6 +47,15 @@ public class PauseMenuManager : MonoBehaviour
         isPaused = true;
         Cursor.lockState = CursorLockMode.None; // カーソルロックを解除
         Cursor.visible = true;
+        // ★追加: ハイスコアを表示する
+        if (highScoreText != null)
+        {
+            // GameManagerが持つ静的な累計スコアを表示
+            highScoreText.text = "High Score: " + GameManager.totalScore.ToString();
+        }
+        
+        // ★追加: AudioManagerにスライダーを探して設定するよう命令
+        AudioManager.instance.FindAndSetSliders();
     }
 
     public void QuitGame()

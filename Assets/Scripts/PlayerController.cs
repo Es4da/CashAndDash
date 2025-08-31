@@ -1,6 +1,7 @@
 using UnityEngine;
 using Cinemachine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -52,6 +53,9 @@ public class PlayerController : MonoBehaviour
     public float staminaDrainRate = 20f; // 1秒間に消費するスタミナ
     public float staminaRegenRate = 15f; // 1秒間に回復するスタミナ
     public float staminaRegenDelay = 2f; // 回復が始まるまでの待機時間
+    [Header("UI")] // ★追加: UI参照用のヘッダー
+    public Image damageFlashPanel;
+    public float flashDuration = 0.1f;
 
     void Start()
     {
@@ -287,14 +291,30 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage, Vector3 knockbackDirection)
     {
+        if (GameManager.instance.isPlayerInvincible)
+        {
+            return; // この関数の処理をここで中断する
+        }
         GameManager.instance.DoHitStop(0.2f);
         GameManager.instance.playerCurrentHealth -= damage;
         AudioManager.instance.PlaySfx(hitSfx);
         UpdateHealthUI();
+        StartCoroutine(DamageFlashEffect());
 
         knockbackVelocity = knockbackDirection * knockbackForce;
 
         if (GameManager.instance.playerCurrentHealth <= 0) Die();
+    }
+    private IEnumerator DamageFlashEffect()
+    {
+        if (damageFlashPanel == null) yield break;
+
+        // フェードイン
+        damageFlashPanel.color = new Color(1f, 0f, 0f, 0.15f); // 半透明の赤
+        yield return new WaitForSeconds(flashDuration / 2);
+
+        // フェードアウト
+        damageFlashPanel.color = new Color(1f, 0f, 0f, 0f); // 透明に戻す
     }
 
     // 自身のHPが変動した時に、GameManagerが持つUIの参照を直接更新する
