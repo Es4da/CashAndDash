@@ -55,7 +55,6 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;
             playerCurrentHealth = playerMaxHealth;
         }
         else if (instance != this)
@@ -119,31 +118,36 @@ public class GameManager : MonoBehaviour
     }
     void InitializeStartPoint()
     {
-        // "StartPoint"という名前が含まれるオブジェクトを全て探す
-        startPoints = GameObject.FindObjectsOfType<GameObject>()
-            .Where(g => g.name.Contains("StartPoint"))
-            .Select(g => g.transform).ToList();
+        // "SpawnLocation"という名前が含まれる親オブジェクトを全て探す
+        var spawnLocations = GameObject.FindObjectsOfType<GameObject>()
+            .Where(g => g.name.Contains("SpawnLocation")).ToList();
 
-        if (startPoints.Count > 0)
+        if (spawnLocations.Count > 0)
         {
-            // ランダムなスタート地点を選ぶ
-            Transform selectedPoint = startPoints[Random.Range(0, startPoints.Count)];
+            // ランダムなスポーングループを選ぶ
+            GameObject selectedLocation = spawnLocations[Random.Range(0, spawnLocations.Count)];
 
-            // プレイヤーを探して、その位置と向きをワープさせる
-            PlayerController player = FindObjectOfType<PlayerController>();
-            if (player != null)
-            {
-                // CharacterControllerはワープ前に一度無効にするのが安全
-                player.GetComponent<CharacterController>().enabled = false;
-                player.transform.position = selectedPoint.position;
-                player.transform.rotation = selectedPoint.rotation;
-                player.GetComponent<CharacterController>().enabled = true;
-            }
+            // そのグループの中から、PlayerとVanのスポーン地点を探す
+            Transform playerSpawn = selectedLocation.transform.Find("PlayerSpawn");
+            Transform vanSpawn = selectedLocation.transform.Find("VanSpawn");
 
-            // 選んだ位置にバンを出現させる
-            if (vanPrefab != null)
+            if (playerSpawn != null && vanSpawn != null)
             {
-                Instantiate(vanPrefab, selectedPoint.position, selectedPoint.rotation);
+                // プレイヤーを配置
+                PlayerController player = FindObjectOfType<PlayerController>();
+                if (player != null)
+                {
+                    player.GetComponent<CharacterController>().enabled = false;
+                    player.transform.position = playerSpawn.position;
+                    player.transform.rotation = playerSpawn.rotation;
+                    player.GetComponent<CharacterController>().enabled = true;
+                }
+
+                // バンを配置
+                if (vanPrefab != null)
+                {
+                    Instantiate(vanPrefab, vanSpawn.position, vanSpawn.rotation);
+                }
             }
         }
     }

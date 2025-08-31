@@ -3361,7 +3361,7 @@ MonoBehaviour:
   hubSceneName: Garage
   initialUnlockDelay: 5
   subsequentUnlockInterval: 30
-  vanPrefab: {fileID: 4534957618600462091, guid: f796c3a4fe52248478ea5453bce81d1f, type: 3}
+  vanPrefab: {fileID: 6754692688800693703, guid: e0d7e3b02018cae4596d17ff63708628, type: 3}
   missionCompleteSfx: {fileID: 8300000, guid: 69cfb2b5bf04a484ca6741c5b45a34d5, type: 3}
   gameOverSfx: {fileID: 8300000, guid: 951d525c642ebfe4288c466e7c28c24d, type: 3}
 --- !u!4 &1701165903

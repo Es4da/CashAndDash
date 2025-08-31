@@ -61,24 +61,6 @@ public class PlayerController : MonoBehaviour
         // まず1フレームだけ待つ。これにより、他の全てのオブジェクトが準備完了するのを待つ。
         yield return null;
 
-        GameObject startPoint = GameObject.Find("PlayerStartPoint");
-        if (startPoint != null)
-        {
-            // 位置と回転をリセット
-            transform.position = startPoint.transform.position;
-            transform.rotation = startPoint.transform.rotation;
-
-            // カメラの軸をリセット
-            if (freeLookCamera != null)
-            {
-                freeLookCamera.m_XAxis.Value = transform.eulerAngles.y + cameraStartAngleOffset;
-            }
-        }
-        else
-        {
-            Debug.LogWarning("PlayerStartPointが見つかりませんでした。");
-        }
-
         UpdateHealthUI();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
