@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private AudioSource footstepSource;
     private float currentAttackCooldown = 0f;
+    private HighlightEffect currentHighlight;
 
     [Header("Audio")]
     public AudioClip attackSfx;
@@ -190,25 +191,56 @@ public class PlayerController : MonoBehaviour
     }
 
     void HandleInteraction()
+{
+    Vector3 rayOrigin = playerEyes.position;
+    Vector3 rayDirection = Camera.main.transform.forward;
+    RaycastHit hit;
+    
+    // 現在、視線の先に何がハイライトされるべきかを保持する変数
+    HighlightEffect highlightableObject = null;
+
+    // --- ステップ1: 視線の先のオブジェクトを調べる ---
+    if (Physics.Raycast(rayOrigin, rayDirection, out hit, interactDistance))
     {
-        Vector3 rayOrigin = playerEyes.position;
-        Vector3 rayDirection = Camera.main.transform.forward;
-        RaycastHit hit;
-        if (Physics.Raycast(rayOrigin, rayDirection, out hit, interactDistance))
-        {
-            if (hit.collider.CompareTag("Interactable") && Input.GetKeyDown(KeyCode.F))
-            {
-                TreasureBox treasure = hit.collider.GetComponent<TreasureBox>();
-                if (treasure != null) treasure.OnInteract();
-
-                Van van = hit.collider.GetComponent<Van>();
-                if (van != null) van.OnInteract();
-
-                MissionGiver missionGiver = hit.collider.GetComponent<MissionGiver>();
-                if (missionGiver != null) missionGiver.OnInteract();
-            }
-        }
+        // 当たったオブジェクトからHighlightEffectコンポーネントを探す
+        highlightableObject = hit.collider.GetComponent<HighlightEffect>();
     }
+
+    // --- ステップ2: ハイライトの状態を管理する ---
+    // もし、前回光らせていた物と、今回光らせるべき物が違うなら
+    if (currentHighlight != highlightableObject)
+    {
+        // 前回光らせていた物があれば、まずそれを消灯する
+        if (currentHighlight != null)
+        {
+            currentHighlight.ToggleHighlight(false);
+        }
+        
+        // 新しく光らせるべき物があれば、それを点灯する
+        if (highlightableObject != null)
+        {
+            highlightableObject.ToggleHighlight(true);
+        }
+
+        // 現在光っている物を更新する
+        currentHighlight = highlightableObject;
+    }
+    
+    // --- ステップ3: インタラクトの実行 ---
+    // もし何かが光っている状態で、Fキーが押されたら
+    if (currentHighlight != null && Input.GetKeyDown(KeyCode.F))
+    {
+        // 光っているオブジェクトから、各種コンポーネントを探して実行する
+        TreasureBox treasure = currentHighlight.GetComponent<TreasureBox>();
+        if (treasure != null) treasure.OnInteract();
+
+        Van van = currentHighlight.GetComponent<Van>();
+        if (van != null) van.OnInteract();
+
+        MissionGiver missionGiver = currentHighlight.GetComponent<MissionGiver>();
+        if (missionGiver != null) missionGiver.OnInteract();
+    }
+}
 
     void HandleAttack()
     {

@@ -853,7 +853,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 648440253}
-  m_LocalRotation: {x: 0.17597607, y: -0.5450418, z: 0.11824342, w: 0.8111599}
+  m_LocalRotation: {x: 0.17597608, y: -0.54504186, z: 0.118243426, w: 0.8111599}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1334,6 +1334,7 @@ GameObject:
   - component: {fileID: 899195198}
   - component: {fileID: 899195197}
   - component: {fileID: 899195201}
+  - component: {fileID: 899195202}
   m_Layer: 0
   m_Name: Gordo
   m_TagString: Interactable
@@ -1442,6 +1443,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneNameToLoad: Mission
+--- !u!114 &899195202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899195196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &927947662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2457,7 +2473,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1235091407}
-  m_LocalRotation: {x: 0.17597604, y: -0.54504174, z: 0.1182434, w: 0.8111599}
+  m_LocalRotation: {x: 0.17597604, y: -0.5450418, z: 0.118243426, w: 0.81115985}
   m_LocalPosition: {x: 5.555089, y: 4, z: -2.2674618}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

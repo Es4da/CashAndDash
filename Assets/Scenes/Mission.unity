@@ -6201,6 +6201,7 @@ GameObject:
   - component: {fileID: 599657101}
   - component: {fileID: 599657100}
   - component: {fileID: 599657099}
+  - component: {fileID: 599657104}
   m_Layer: 7
   m_Name: TresureBox (2)
   m_TagString: Interactable
@@ -6308,6 +6309,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 39
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &599657104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599657098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &618249989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7546,6 +7562,7 @@ GameObject:
   - component: {fileID: 734972820}
   - component: {fileID: 734972819}
   - component: {fileID: 734972818}
+  - component: {fileID: 734972823}
   m_Layer: 7
   m_Name: TresureBox (1)
   m_TagString: Interactable
@@ -7653,6 +7670,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 38
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &734972823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734972817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &762677031
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10128,6 +10160,7 @@ GameObject:
   - component: {fileID: 987785592}
   - component: {fileID: 987785591}
   - component: {fileID: 987785590}
+  - component: {fileID: 987785595}
   m_Layer: 7
   m_Name: TresureBox (3)
   m_TagString: Interactable
@@ -10235,6 +10268,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 40
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &987785595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 987785589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &1000027470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14233,6 +14281,7 @@ GameObject:
   - component: {fileID: 1303611535}
   - component: {fileID: 1303611534}
   - component: {fileID: 1303611538}
+  - component: {fileID: 1303611539}
   m_Layer: 7
   m_Name: TresureBox
   m_TagString: Interactable
@@ -14340,6 +14389,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moneyValue: 100
   collectSfx: {fileID: 8300000, guid: 5d8f19093bbf3cd49be34b91b53191fc, type: 3}
+--- !u!114 &1303611539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303611533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &1307279901
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18307,6 +18371,7 @@ GameObject:
   - component: {fileID: 1812325046}
   - component: {fileID: 1812325045}
   - component: {fileID: 1812325044}
+  - component: {fileID: 1812325049}
   m_Layer: 7
   m_Name: TresureBox (4)
   m_TagString: Interactable
@@ -18414,6 +18479,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 42
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1812325049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812325043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c96d736713eea20459d27f9c868b0263, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineThickness: 0.02
+  outlineMaterial: {fileID: 2100000, guid: 6f52f776697c2d1498342998db423747, type: 2}
 --- !u!1001 &1815458521
 PrefabInstance:
   m_ObjectHideFlags: 0
