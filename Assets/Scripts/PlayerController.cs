@@ -40,11 +40,18 @@ public class PlayerController : MonoBehaviour
     private AudioSource footstepSource;
     private float currentAttackCooldown = 0f;
     private HighlightEffect currentHighlight;
+    private float currentStamina; // ★追加
+    private float staminaRegenTimer;
 
     [Header("Audio")]
     public AudioClip attackSfx;
     public AudioClip hitSfx;
     public AudioClip jumpSfx;
+    [Header("Stamina")] // ★追加
+    public float maxStamina = 100f;
+    public float staminaDrainRate = 20f; // 1秒間に消費するスタミナ
+    public float staminaRegenRate = 15f; // 1秒間に回復するスタミナ
+    public float staminaRegenDelay = 2f; // 回復が始まるまでの待機時間
 
     void Start()
     {
@@ -61,6 +68,7 @@ public class PlayerController : MonoBehaviour
         // まず1フレームだけ待つ。これにより、他の全てのオブジェクトが準備完了するのを待つ。
         yield return null;
 
+        currentStamina = maxStamina;
         UpdateHealthUI();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -146,7 +154,7 @@ public class PlayerController : MonoBehaviour
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
-        bool isDashing = Input.GetKey(KeyCode.LeftShift);
+        bool isDashing = Input.GetKey(KeyCode.LeftShift) && currentStamina > 0;
         float currentSpeed = isDashing ? dashSpeed : moveSpeed;
 
         Vector3 moveDirection = (mainCameraTransform.forward * verticalInput + mainCameraTransform.right * horizontalInput);
@@ -169,7 +177,32 @@ public class PlayerController : MonoBehaviour
             playerModel.rotation = Quaternion.Slerp(playerModel.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
+        HandleStamina(isDashing);
         return moveDirection * currentSpeed;
+    }
+    void HandleStamina(bool isDashing)
+    {
+        if (isDashing)
+        {
+            // ダッシュ中ならスタミナを消費
+            currentStamina -= staminaDrainRate * Time.deltaTime;
+            staminaRegenTimer = 0f; // 回復タイマーをリセット
+        }
+        else
+        {
+            // ダッシュしていないなら回復の準備
+            staminaRegenTimer += Time.deltaTime;
+            if (staminaRegenTimer >= staminaRegenDelay && currentStamina < maxStamina)
+            {
+                // 一定時間経過後、スタミナを回復
+                currentStamina += staminaRegenRate * Time.deltaTime;
+            }
+        }
+        // スタミナが0未満や最大値を超えないように制限
+        currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
+
+        // UIを更新
+        GameManager.instance.UpdateStaminaUI(currentStamina, maxStamina);
     }
 
     void HandleInteraction()

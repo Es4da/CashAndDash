@@ -4,7 +4,8 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Rendering; // Rendering関連の機能を使うために必要
+using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,8 +13,8 @@ public class GameManager : MonoBehaviour
     public static int currentRound = 1;
     public static int totalScore = 0;
 
-    [Header("Player Stats (Persistent)")] // ★追加
-    public int playerMaxHealth = 100;    // ★追加
+    [Header("Player Stats (Persistent)")]
+    public int playerMaxHealth = 100;
     public int playerCurrentHealth;
 
     [Header("Mission Gameplay")]
@@ -21,33 +22,30 @@ public class GameManager : MonoBehaviour
     public int deliveredMoney = 0;
     public int moneyGoal;
 
-    [Header("UI References (Auto-Found)")]
-    public TextMeshProUGUI moneyText;
-    public TextMeshProUGUI deliveredMoneyText;
-    public TextMeshProUGUI healthText;
-    public TextMeshProUGUI totalScoreText;
-    public CanvasGroup missionCompleteScreenCanvasGroup;
-    public CanvasGroup gameOverScreenCanvasGroup;
-
-    [Header("Win/Loss Settings")]
+    [Header("Settings")]
     public float timeSlowdownFactor = 0.2f;
-    public float fadeDuration = 1.5f;
+    public float fadeDuration = 1f;
     public float waitBeforeReturn = 3.0f;
     public string missionSceneName = "Mission";
     public string hubSceneName = "Garage";
-
-    [Header("Mission Settings")]
     public float initialUnlockDelay = 5f;
     public float subsequentUnlockInterval = 30f;
-    private List<TreasureBox> allTreasureBoxes;
-    private Coroutine unlockCoroutine;
-    [Header("Mission Setup")]
-    public GameObject vanPrefab; // ★追加: バンのプレハブ
-    private List<Transform> startPoints; // ★追加: スタート地点のリスト
-
-    [Header("Audio")]
+    public GameObject vanPrefab;
     public AudioClip missionCompleteSfx;
     public AudioClip gameOverSfx;
+    
+    // UI参照はスクリプト内部で管理（private）
+    private TextMeshProUGUI moneyText;
+    private TextMeshProUGUI deliveredMoneyText;
+    public TextMeshProUGUI healthText;
+    private TextMeshProUGUI totalScoreText;
+    private CanvasGroup missionCompleteScreenCanvasGroup;
+    private CanvasGroup gameOverScreenCanvasGroup;
+    private Slider staminaBar;
+    private CanvasGroup fadePanelCanvasGroup;
+
+    private List<TreasureBox> allTreasureBoxes;
+    private Coroutine unlockCoroutine;
 
     void Awake()
     {
@@ -57,7 +55,7 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             playerCurrentHealth = playerMaxHealth;
         }
-        else if (instance != this)
+        else
         {
             Destroy(gameObject);
         }
@@ -72,68 +70,228 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
+    void SetMissionGoal()
+{
+    switch (currentRound)
+    {
+        case 1: moneyGoal = 100; break;
+        case 2: moneyGoal = 200; break;
+        case 3: moneyGoal = 300; break;
+        case 4: moneyGoal = 400; break;
+        default: moneyGoal = 500; break; // 5ラウンド以上は500
+    }
+    Debug.Log("Round " + currentRound + " Start! Goal: " + moneyGoal);
+}
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // ★★★ 修正点 ★★★
+        // 1. まず、シーン内のUIを全て探しに行く
+        FindSceneUI(scene.name);
+
+        // 2. UIを探した後で、フェードアウトを開始する
+        StartCoroutine(Fade(0f));
+
+        // 3. その他の設定を行う
         AudioManager.instance.SetCutsceneMode(false);
+        
         if (scene.name == missionSceneName)
         {
-            // ★変更: 宝箱より先にスタート地点を決める
-            InitializeStartPoint(); 
             SetMissionGoal();
+            InitializeStartPoint();
             InitializeTreasureBoxes();
         }
-        FindSceneUI(scene.name);
+        
         DynamicGI.UpdateEnvironment();
     }
 
     void FindSceneUI(string sceneName)
     {
+        // まず、どのシーンにも共通で存在する可能性があるものを探す
+        fadePanelCanvasGroup = GameObject.Find("FadePanel")?.GetComponent<CanvasGroup>();
+
+        // シーン名に応じて、探す対象を分岐させる
         if (sceneName == missionSceneName)
         {
-            GameObject moneyTextObject = GameObject.Find("MoneyText");
-            if (moneyTextObject != null) moneyText = moneyTextObject.GetComponent<TextMeshProUGUI>();
-
-            GameObject deliveredMoneyTextObject = GameObject.Find("DeliveredMoneyText");
-            if (deliveredMoneyTextObject != null) deliveredMoneyText = deliveredMoneyTextObject.GetComponent<TextMeshProUGUI>();
-
-            GameObject healthTextObject = GameObject.Find("HP");
-            if (healthTextObject != null) healthText = healthTextObject.GetComponent<TextMeshProUGUI>();
-
-            GameObject mcsObject = GameObject.Find("MissionCompleteScreen");
-            if (mcsObject != null) missionCompleteScreenCanvasGroup = mcsObject.GetComponent<CanvasGroup>();
-
+            // --- Missionシーンにしか存在しないUI ---
+            moneyText = GameObject.Find("MoneyText")?.GetComponent<TextMeshProUGUI>();
+            deliveredMoneyText = GameObject.Find("DeliveredMoneyText")?.GetComponent<TextMeshProUGUI>();
+            healthText = GameObject.Find("HP")?.GetComponent<TextMeshProUGUI>();
+            missionCompleteScreenCanvasGroup = GameObject.Find("MissionCompleteScreen")?.GetComponent<CanvasGroup>();
+            gameOverScreenCanvasGroup = GameObject.Find("GameOverScreen")?.GetComponent<CanvasGroup>();
+            staminaBar = GameObject.Find("StaminaBar")?.GetComponent<Slider>();
+            
+            // ミッション開始時にスコアをリセット
             deliveredMoney = 0;
             currentMoney = 0;
-            GameObject goScreenObject = GameObject.Find("GameOverScreen"); // ★追加
-            if (goScreenObject != null) gameOverScreenCanvasGroup = goScreenObject.GetComponent<CanvasGroup>();
         }
         else if (sceneName == hubSceneName)
         {
-            GameObject totalScoreObject = GameObject.Find("TotalScoreText");
-            if (totalScoreObject != null) totalScoreText = totalScoreObject.GetComponent<TextMeshProUGUI>();
+            // --- Garageシーンにしか存在しないUI ---
+            totalScoreText = GameObject.Find("TotalScoreText")?.GetComponent<TextMeshProUGUI>();
         }
 
+        // 最後に、見つかったUIだけを更新する
         UpdateAllUI(sceneName);
     }
+    
+    public void LoadSceneWithFade(string sceneName)
+    {
+        StartCoroutine(LoadSceneCoroutine(sceneName));
+    }
+
+    private IEnumerator LoadSceneCoroutine(string sceneName)
+    {
+        yield return StartCoroutine(Fade(1f)); // フェードイン
+        SceneManager.LoadScene(sceneName);
+    }
+
+    public IEnumerator Fade(float targetAlpha)
+    {
+        if (fadePanelCanvasGroup == null)
+        {
+            Debug.LogWarning("FadePanel in scene could not be found.");
+            yield break;
+        }
+
+        fadePanelCanvasGroup.gameObject.SetActive(true);
+        float startAlpha = fadePanelCanvasGroup.alpha;
+        float timer = 0f;
+
+        while (timer < fadeDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            fadePanelCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, timer / fadeDuration);
+            yield return null;
+        }
+
+        fadePanelCanvasGroup.alpha = targetAlpha;
+        if (targetAlpha == 0)
+        {
+            fadePanelCanvasGroup.gameObject.SetActive(false);
+        }
+    }
+
+    public void AddMoney(int amount)
+    {
+        currentMoney += amount;
+        UpdateAllUI(SceneManager.GetActiveScene().name);
+    }
+
+    public void DeliverMoney()
+    {
+        deliveredMoney += currentMoney;
+        currentMoney = 0;
+        UpdateAllUI(SceneManager.GetActiveScene().name);
+
+        if (deliveredMoney >= moneyGoal)
+        {
+            StartCoroutine(WinSequenceCoroutine());
+        }
+    }
+    
+    private IEnumerator WinSequenceCoroutine()
+    {
+        Debug.Log("ミッションコンプリート！");
+        AudioManager.instance.StopBgm();
+        FindObjectOfType<PlayerController>()?.StopFootsteps();
+        AudioManager.instance.SetCutsceneMode(true);
+        AudioManager.instance.PlayCutsceneSfx(missionCompleteSfx);
+        Time.timeScale = timeSlowdownFactor;
+
+        yield return StartCoroutine(Fade(1f, missionCompleteScreenCanvasGroup)); // 画面をフェード
+
+        yield return new WaitForSecondsRealtime(waitBeforeReturn);
+
+        totalScore += deliveredMoney;
+        currentRound++;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(hubSceneName);
+    }
+
+    public void GameOver()
+    {
+        StartCoroutine(GameOverSequenceCoroutine());
+    }
+
+    private IEnumerator GameOverSequenceCoroutine()
+    {
+        Debug.Log("ゲームオーバー！");
+        FindObjectOfType<PlayerController>()?.TriggerDeathAnimation();
+
+        AudioManager.instance.SetCutsceneMode(true);
+        AudioManager.instance.StopBgm();
+        AudioManager.instance.PlayCutsceneSfx(gameOverSfx);
+        Time.timeScale = timeSlowdownFactor;
+
+        yield return StartCoroutine(Fade(1f, gameOverScreenCanvasGroup)); // 画面をフェード
+
+        yield return new WaitForSecondsRealtime(waitBeforeReturn);
+        
+        currentRound = 1;
+        totalScore = 0;
+        playerCurrentHealth = playerMaxHealth;
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(hubSceneName);
+    }
+    
+    // フェード処理を、特定のCanvasGroupに対して行えるようにオーバーロード
+    private IEnumerator Fade(float targetAlpha, CanvasGroup group)
+    {
+        if (group == null) yield break;
+        group.gameObject.SetActive(true);
+        float startAlpha = group.alpha;
+        float timer = 0f;
+        while (timer < fadeDuration)
+        {
+            timer += Time.unscaledDeltaTime;
+            group.alpha = Mathf.Lerp(startAlpha, targetAlpha, timer / fadeDuration);
+            yield return null;
+        }
+        group.alpha = targetAlpha;
+    }
+    
+    // --- 以下の関数は、あなたのコードから変更・整理したものです ---
+    public void UpdateStaminaUI(float currentStamina, float maxStamina)
+    {
+        if (staminaBar != null)
+        {
+            staminaBar.maxValue = maxStamina;
+            staminaBar.value = currentStamina;
+        }
+    }
+
+    public void UpdateAllUI(string sceneName)
+    {
+        if (sceneName == missionSceneName)
+        {
+            if (moneyText != null) moneyText.text = "Carrying: " + currentMoney.ToString();
+            if (deliveredMoneyText != null) deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString() + " / " + moneyGoal.ToString();
+            
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (player != null) player.UpdateHealthUI();
+        }
+        else if (sceneName == hubSceneName)
+        {
+            if (totalScoreText != null) totalScoreText.text = "Total Score: " + totalScore.ToString();
+        }
+    }
+    
+    // --- 以下の関数はあなたのコードには無かったものや、整理が必要なものです ---
     void InitializeStartPoint()
     {
-        // "SpawnLocation"という名前が含まれる親オブジェクトを全て探す
         var spawnLocations = GameObject.FindObjectsOfType<GameObject>()
             .Where(g => g.name.Contains("SpawnLocation")).ToList();
 
         if (spawnLocations.Count > 0)
         {
-            // ランダムなスポーングループを選ぶ
             GameObject selectedLocation = spawnLocations[Random.Range(0, spawnLocations.Count)];
-
-            // そのグループの中から、PlayerとVanのスポーン地点を探す
             Transform playerSpawn = selectedLocation.transform.Find("PlayerSpawn");
             Transform vanSpawn = selectedLocation.transform.Find("VanSpawn");
 
             if (playerSpawn != null && vanSpawn != null)
             {
-                // プレイヤーを配置
                 PlayerController player = FindObjectOfType<PlayerController>();
                 if (player != null)
                 {
@@ -143,7 +301,6 @@ public class GameManager : MonoBehaviour
                     player.GetComponent<CharacterController>().enabled = true;
                 }
 
-                // バンを配置
                 if (vanPrefab != null)
                 {
                     Instantiate(vanPrefab, vanSpawn.position, vanSpawn.rotation);
@@ -151,20 +308,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    void SetMissionGoal()
-    {
-        switch (currentRound)
-        {
-            case 1: moneyGoal = 100; break;
-            case 2: moneyGoal = 200; break;
-            case 3: moneyGoal = 300; break;
-            case 4: moneyGoal = 400; break;
-            default: moneyGoal = 500; break;
-        }
-        Debug.Log("Round " + currentRound + " Start! Goal: " + moneyGoal);
-    }
-
+    
     void InitializeTreasureBoxes()
     {
         if (unlockCoroutine != null)
@@ -187,140 +331,26 @@ public class GameManager : MonoBehaviour
         {
             int randomIndex = Random.Range(0, inactiveBoxes.Count);
             inactiveBoxes[randomIndex].Activate();
-            Debug.Log(inactiveBoxes[randomIndex].name + " がアンロックされました！");
             inactiveBoxes.RemoveAt(randomIndex);
-
-            if (inactiveBoxes.Count > 0)
+            
+            if(inactiveBoxes.Count > 0)
             {
                 yield return new WaitForSeconds(subsequentUnlockInterval);
             }
         }
     }
 
-    private void OnDestroy()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    public void AddMoney(int amount)
-    {
-        currentMoney += amount;
-        UpdateAllUI(SceneManager.GetActiveScene().name);
-    }
-
-    public void DeliverMoney()
-    {
-        deliveredMoney += currentMoney;
-        currentMoney = 0;
-        UpdateAllUI(SceneManager.GetActiveScene().name);
-
-        if (deliveredMoney >= moneyGoal)
-        {
-            StartCoroutine(WinSequenceCoroutine());
-        }
-    }
     public void DoHitStop(float duration)
     {
-        StartCoroutine(HitStopCoroutine(duration));
+        if(Time.timeScale > 0.5f) // 既にスローの時は実行しない
+            StartCoroutine(HitStopCoroutine(duration));
     }
+    
     private IEnumerator HitStopCoroutine(float duration)
     {
-        Time.timeScale = 0.1f; // 時間をスローに
-        yield return new WaitForSecondsRealtime(duration); // 指定時間、現実時間で待つ
-        // 勝利演出中でなければ、時間を元に戻す
-        if (Time.timeScale < 0.5f) // スロー演出中でないことを確認
-        {
-             Time.timeScale = 1f;
-        }
-    }
-
-
-    private IEnumerator WinSequenceCoroutine()
-    {
-        Debug.Log("ミッションコンプリート！");
-        AudioManager.instance.StopBgm();
-        PlayerController player = FindObjectOfType<PlayerController>();
-        if (player != null)
-        {
-            player.StopFootsteps();
-        }
-        AudioManager.instance.SetCutsceneMode(true);
-        AudioManager.instance.PlayCutsceneSfx(missionCompleteSfx);
-        Time.timeScale = timeSlowdownFactor;
-
-        float timer = 0;
-        while (timer < fadeDuration)
-        {
-            if (missionCompleteScreenCanvasGroup != null)
-            {
-                missionCompleteScreenCanvasGroup.alpha = Mathf.Lerp(0, 1, timer / fadeDuration);
-            }
-            timer += Time.unscaledDeltaTime;
-            yield return null;
-        }
-        if (missionCompleteScreenCanvasGroup != null) missionCompleteScreenCanvasGroup.alpha = 1;
-
-        yield return new WaitForSecondsRealtime(waitBeforeReturn);
-
-        totalScore += deliveredMoney;
-        currentRound++;
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(hubSceneName);
-    }
-
-    public void GameOver()
-    {
-        StartCoroutine(GameOverSequenceCoroutine());
-    }
-
-    public void UpdateAllUI(string sceneName)
-    {
-        if (sceneName == missionSceneName)
-        {
-            if (moneyText != null) moneyText.text = "Carrying: " + currentMoney.ToString();
-
-            // ★変更点: ノルマ表示を追加
-            if (deliveredMoneyText != null) deliveredMoneyText.text = "Delivered: " + deliveredMoney.ToString() + " / " + moneyGoal.ToString();
-
-            PlayerController player = FindObjectOfType<PlayerController>();
-            if (player != null) player.UpdateHealthUI();
-        }
-        else if (sceneName == hubSceneName)
-        {
-            if (totalScoreText != null) totalScoreText.text = "Total Score: " + totalScore.ToString();
-        }
-    }
-    private IEnumerator GameOverSequenceCoroutine()
-    {
-        Debug.Log("ゲームオーバー！");
-        FindObjectOfType<PlayerController>()?.TriggerDeathAnimation(); // プレイヤーに死亡アニメ再生を命令
-
-        AudioManager.instance.SetCutsceneMode(true);
-        AudioManager.instance.StopBgm();
-        AudioManager.instance.PlayCutsceneSfx(gameOverSfx);
-
-        Time.timeScale = timeSlowdownFactor;
-
-        float timer = 0;
-        while (timer < fadeDuration)
-        {
-            if (gameOverScreenCanvasGroup != null)
-            {
-                gameOverScreenCanvasGroup.alpha = Mathf.Lerp(0, 1, timer / fadeDuration);
-            }
-            timer += Time.unscaledDeltaTime;
-            yield return null;
-        }
-        if (gameOverScreenCanvasGroup != null) gameOverScreenCanvasGroup.alpha = 1;
-
-        yield return new WaitForSecondsRealtime(waitBeforeReturn);
-
-        // 進行状況をリセット
-        currentRound = 1;
-        totalScore = 0;
-        playerCurrentHealth = playerMaxHealth;
-
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(hubSceneName);
+        float originalTimeScale = Time.timeScale;
+        Time.timeScale = 0.1f;
+        yield return new WaitForSecondsRealtime(duration);
+        Time.timeScale = originalTimeScale;
     }
 }

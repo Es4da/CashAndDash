@@ -4,6 +4,7 @@ using System.Collections;
 using System.Linq; // FindObjectsOfTypeで使う可能性のため（今回は不要ですが作法として）
 using System.Collections.Generic; // Listを使うため
 
+
 public class EnemyAI : MonoBehaviour
 {
     // AIの状態を定義
@@ -31,11 +32,13 @@ public class EnemyAI : MonoBehaviour
     private AIState currentState;
     private int currentPatrolIndex;
     private float lastAttackTime; // 最後に攻撃した時間
+    private Animator animator;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        animator = GetComponentInChildren<Animator>();
 
         // 初期状態を巡回に設定
         currentState = AIState.Patrolling;
@@ -45,6 +48,10 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", agent.velocity.magnitude, 0.1f, Time.deltaTime);
+        }
         // 状態に応じた処理を実行
         switch (currentState)
         {

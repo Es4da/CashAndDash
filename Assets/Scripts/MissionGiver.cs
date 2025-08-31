@@ -1,14 +1,15 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+// using System.Collections; // ← 不要なので削除してOK
 
 public class MissionGiver : MonoBehaviour
 {
-    public string sceneNameToLoad = "Mission"; // ここにミッションシーンの名前を入れる
+    public string sceneNameToLoad = "Mission";
 
     public void OnInteract()
     {
         Debug.Log("ミッションを受注した！");
-        // 指定されたシーンを読み込む
-        SceneManager.LoadScene(sceneNameToLoad);
+        // GameManagerの新しい関数を呼び出す
+        GameManager.instance.LoadSceneWithFade(sceneNameToLoad);
     }
 }
