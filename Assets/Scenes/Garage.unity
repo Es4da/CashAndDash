@@ -3216,7 +3216,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1528697412}
-  m_LocalRotation: {x: 0.19070154, y: -0.54280084, z: 0.12813787, w: 0.80782485}
+  m_LocalRotation: {x: 0.19070153, y: -0.5428009, z: 0.12813792, w: 0.8078248}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3345,6 +3345,7 @@ MonoBehaviour:
   hubSceneName: Garage
   initialUnlockDelay: 5
   subsequentUnlockInterval: 30
+  vanPrefab: {fileID: 1624584529781476455, guid: a2b0ded3ec5781c47b4df97079af13f9, type: 3}
   missionCompleteSfx: {fileID: 8300000, guid: 69cfb2b5bf04a484ca6741c5b45a34d5, type: 3}
   gameOverSfx: {fileID: 8300000, guid: 951d525c642ebfe4288c466e7c28c24d, type: 3}
 --- !u!4 &1701165903

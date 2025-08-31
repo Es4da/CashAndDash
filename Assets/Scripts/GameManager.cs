@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Rendering; // Rendering関連の機能を使うために必要
 
 public class GameManager : MonoBehaviour
 {
@@ -40,6 +41,9 @@ public class GameManager : MonoBehaviour
     public float subsequentUnlockInterval = 30f;
     private List<TreasureBox> allTreasureBoxes;
     private Coroutine unlockCoroutine;
+    [Header("Mission Setup")]
+    public GameObject vanPrefab; // ★追加: バンのプレハブ
+    private List<Transform> startPoints; // ★追加: スタート地点のリスト
 
     [Header("Audio")]
     public AudioClip missionCompleteSfx;
@@ -73,20 +77,15 @@ public class GameManager : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         AudioManager.instance.SetCutsceneMode(false);
-        // 先に目標金額を設定する
         if (scene.name == missionSceneName)
         {
+            // ★変更: 宝箱より先にスタート地点を決める
+            InitializeStartPoint(); 
             SetMissionGoal();
-        }
-
-        // その後で、UIを探して最新の情報で更新する
-        FindSceneUI(scene.name);
-
-        // UI設定後に、宝箱を初期化する
-        if (scene.name == missionSceneName)
-        {
             InitializeTreasureBoxes();
         }
+        FindSceneUI(scene.name);
+        DynamicGI.UpdateEnvironment();
     }
 
     void FindSceneUI(string sceneName)
@@ -117,6 +116,36 @@ public class GameManager : MonoBehaviour
         }
 
         UpdateAllUI(sceneName);
+    }
+    void InitializeStartPoint()
+    {
+        // "StartPoint"という名前が含まれるオブジェクトを全て探す
+        startPoints = GameObject.FindObjectsOfType<GameObject>()
+            .Where(g => g.name.Contains("StartPoint"))
+            .Select(g => g.transform).ToList();
+
+        if (startPoints.Count > 0)
+        {
+            // ランダムなスタート地点を選ぶ
+            Transform selectedPoint = startPoints[Random.Range(0, startPoints.Count)];
+
+            // プレイヤーを探して、その位置と向きをワープさせる
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (player != null)
+            {
+                // CharacterControllerはワープ前に一度無効にするのが安全
+                player.GetComponent<CharacterController>().enabled = false;
+                player.transform.position = selectedPoint.position;
+                player.transform.rotation = selectedPoint.rotation;
+                player.GetComponent<CharacterController>().enabled = true;
+            }
+
+            // 選んだ位置にバンを出現させる
+            if (vanPrefab != null)
+            {
+                Instantiate(vanPrefab, selectedPoint.position, selectedPoint.rotation);
+            }
+        }
     }
 
     void SetMissionGoal()
