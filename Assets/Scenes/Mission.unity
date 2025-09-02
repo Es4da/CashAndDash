@@ -1067,7 +1067,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -1085,11 +1085,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &107636198
@@ -3199,7 +3199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -3217,11 +3217,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &269598165
@@ -8321,7 +8321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -8339,11 +8339,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &524133161
@@ -8968,7 +8968,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -8986,11 +8986,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &542456662
@@ -14565,11 +14565,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!114 &884643123
@@ -14584,7 +14584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -17926,7 +17926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -17944,11 +17944,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &1090023499
@@ -18890,7 +18890,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -18912,7 +18912,7 @@ MonoBehaviour:
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &1131627567
@@ -25929,7 +25929,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  dashSpeed: 12
+  dashSpeed: 14
   rotationSpeed: 10
   jumpHeight: 3
   gravity: -20
@@ -25955,7 +25955,7 @@ MonoBehaviour:
   staminaRegenRate: 10
   staminaRegenDelay: 1.5
   damageFlashPanel: {fileID: 2106626242}
-  flashDuration: 0.2
+  flashDuration: 0.1
 --- !u!143 &1517409642
 CharacterController:
   m_ObjectHideFlags: 0
@@ -29305,7 +29305,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -29323,11 +29323,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &1776725662
@@ -33063,7 +33063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6251685b28050429f98ee5d3905908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 300
   knockbackForce: 20
   knockbackDuration: 0.3
   hitSfx: {fileID: 8300000, guid: 5fcc0a13c7f70e842a9b65048772af6e, type: 3}
@@ -33081,11 +33081,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patrolSpeed: 2
   chaseSpeed: 7
-  attackDamage: 30
+  attackDamage: 10
   attackRange: 1.75
   attackWindUp: 0.3
   attackCooldown: 2
-  viewRadius: 20
+  viewRadius: 15
   viewAngle: 150
   patrolPoints: []
 --- !u!195 &2001197058

@@ -4,7 +4,7 @@ using System.Collections; // コルーチンを使うために必要
 
 public class EnemyHealth : MonoBehaviour
 {
-    public int maxHealth = 100;
+    public int maxHealth = 300;
     public float knockbackForce = 10f; // 追加: 敵のノックバックの強さ
     public float knockbackDuration = 0.3f; // 追加: 敵のノックバックの時間
     public AudioClip hitSfx;
