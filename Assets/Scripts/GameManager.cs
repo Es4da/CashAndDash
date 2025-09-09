@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     private CanvasGroup gameOverScreenCanvasGroup;
     private Slider staminaBar;
     private CanvasGroup fadePanelCanvasGroup;
+    private RectTransform tutorialPanel;
 
     private List<TreasureBox> allTreasureBoxes;
     private Coroutine unlockCoroutine;
@@ -100,6 +101,10 @@ public class GameManager : MonoBehaviour
         
         if (scene.name == missionSceneName)
         {
+            if (currentRound == 1)
+            {
+                StartCoroutine(ShowTutorialCoroutine());
+            }
             isPlayerInvincible = false;
             SetMissionGoal();
             InitializeStartPoint();
@@ -140,6 +145,12 @@ public class GameManager : MonoBehaviour
                 notificationText = notificationPanel.GetComponentInChildren<TextMeshProUGUI>();
                 notificationPanel.gameObject.SetActive(false); // 確実に非表示から始める
             }
+            Transform tutorialTransform = canvas.transform.Find("TutorialPanel");
+            if(tutorialTransform != null)
+            {
+                tutorialPanel = tutorialTransform.GetComponent<RectTransform>();
+                tutorialPanel.gameObject.SetActive(false); // 確実に非表示から始める
+            }
         }
         else if (sceneName == hubSceneName)
         {
@@ -157,6 +168,39 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(NotificationCoroutine(message));
     }
+    private IEnumerator ShowTutorialCoroutine()
+    {
+        if (tutorialPanel == null) yield break; // パネルが見つからなければ何もしない
+
+        // アニメーション用の座標を設定（インスペクターで調整してください）
+        Vector2 offScreenPos = tutorialPanel.anchoredPosition; // 現在の画面外の位置
+        Vector2 onScreenPos = new Vector2(-50, offScreenPos.y); // 画面内の表示位置
+        float slideDuration = 0.5f;
+
+        // --- 1. スライドイン ---
+        tutorialPanel.gameObject.SetActive(true);
+        float timer = 0f;
+        while(timer < slideDuration)
+        {
+            tutorialPanel.anchoredPosition = Vector2.Lerp(offScreenPos, onScreenPos, timer / slideDuration);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        tutorialPanel.anchoredPosition = onScreenPos;
+
+        // --- 2. 5秒間表示 ---
+        yield return new WaitForSeconds(5f);
+
+        // --- 3. スライドアウト ---
+        timer = 0f;
+        while(timer < slideDuration)
+        {
+            tutorialPanel.anchoredPosition = Vector2.Lerp(onScreenPos, offScreenPos, timer / slideDuration);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        tutorialPanel.gameObject.SetActive(false);
+    }
 
     // ★追加: 通知の表示・非表示アニメーションを制御するコルーチン
     private IEnumerator NotificationCoroutine(string message)
@@ -166,11 +210,11 @@ public class GameManager : MonoBehaviour
         // --- 1. スライドイン ---
         notificationPanel.gameObject.SetActive(true);
         notificationText.text = message;
-        
+
         Vector2 startPos = new Vector2(400, 50); // 画面外右下（仮）
         Vector2 onScreenPos = new Vector2(-50, 50); // 画面内右下（仮）
         float timer = 0f;
-        while(timer < 0.5f) // 0.5秒かけてスライドイン
+        while (timer < 0.5f) // 0.5秒かけてスライドイン
         {
             notificationPanel.anchoredPosition = Vector2.Lerp(startPos, onScreenPos, timer / 0.5f);
             timer += Time.deltaTime;
@@ -183,7 +227,7 @@ public class GameManager : MonoBehaviour
 
         // --- 3. スライドアウト ---
         timer = 0f;
-        while(timer < 0.5f) // 0.5秒かけてスライドアウト
+        while (timer < 0.5f) // 0.5秒かけてスライドアウト
         {
             notificationPanel.anchoredPosition = Vector2.Lerp(onScreenPos, startPos, timer / 0.5f);
             timer += Time.deltaTime;
