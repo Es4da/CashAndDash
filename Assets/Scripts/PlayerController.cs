@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
     private HighlightEffect currentHighlight;
     private float currentStamina; // ★追加
     private float staminaRegenTimer;
+    public bool IsOnPlatform { get; private set; }
 
     [Header("Audio")]
     public AudioClip attackSfx;
@@ -85,7 +86,7 @@ public class PlayerController : MonoBehaviour
         {
             currentAttackCooldown -= Time.deltaTime;
         }
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        CheckGroundedStatus();
         if (isGrounded && playerVelocity.y < 0)
         {
             playerVelocity.y = -2f;
@@ -110,6 +111,29 @@ public class PlayerController : MonoBehaviour
         // 最終的な移動命令
         characterController.Move(finalMove * Time.deltaTime);
         HandleFootsteps();
+    }
+    private void CheckGroundedStatus()
+    {
+        RaycastHit hit;
+        // 足元から真下に短いRayを飛ばす
+        if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 0.3f, groundMask))
+        {
+            isGrounded = true;
+            // 当たった地面のレイヤーが"Platform"かどうかを判別
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Platform"))
+            {
+                IsOnPlatform = true;
+            }
+            else
+            {
+                IsOnPlatform = false;
+            }
+        }
+        else
+        {
+            isGrounded = false;
+            IsOnPlatform = false;
+        }
     }
     void HandleFootsteps()
     {
