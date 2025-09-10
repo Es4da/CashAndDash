@@ -48,6 +48,22 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
+        PlayerController playerController = player.GetComponent<PlayerController>();
+        if (playerController != null && playerController.IsOnPlatform)
+        {
+            // もしプレイヤーがプラットフォーム上にいるなら、AIの思考を停止する
+            agent.isStopped = true;
+            return; // このフレームの以降の処理はすべて中断
+        }
+        else
+        {
+            // プレイヤーがプラットフォーム上にいないなら、AIの思考を再開させる
+            // ただし、攻撃シーケンスの邪魔はしないようにする
+            if (currentState != AIState.Attacking)
+            {
+                agent.isStopped = false;
+            }
+        }
         if (animator != null)
         {
             animator.SetFloat("Speed", agent.velocity.magnitude, 0.1f, Time.deltaTime);
