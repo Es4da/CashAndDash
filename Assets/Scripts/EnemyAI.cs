@@ -26,6 +26,11 @@ public class EnemyAI : MonoBehaviour
     [Header("Patrol")]
     public Transform[] patrolPoints;
 
+    [Header("Detection")]
+    public GameObject alertIconPrefab;
+    public AudioClip alertSfx;
+    public Vector3 iconOffset = new Vector3(0, 2.5f, 0);
+
     // --- Private Variables ---
     private NavMeshAgent agent;
     private Transform player;
@@ -92,7 +97,12 @@ public class EnemyAI : MonoBehaviour
         {
             currentState = AIState.Chasing;
             agent.speed = chaseSpeed;
-            return; // 即座に次のフレームの処理に移る
+            
+            // 2. 発見時の効果音を鳴らす
+            AudioManager.instance.PlaySfx(alertSfx);
+
+            // 3. 「！」アイコンを表示するコルーチンを開始
+            StartCoroutine(ShowAlertIcon());
         }
 
         // 目的地に近づいたら、次の巡回地点へ
@@ -100,6 +110,29 @@ public class EnemyAI : MonoBehaviour
         {
             GoToNextPatrolPoint();
         }
+    }
+    
+    private IEnumerator ShowAlertIcon()
+    {
+        // 自分の頭上の位置に「！」プレハブを生成
+        GameObject icon = Instantiate(alertIconPrefab, transform.position + iconOffset, Quaternion.identity, transform);
+
+        // アイコンが常にカメラの方を向くようにする
+        Transform playerCamera = Camera.main.transform;
+
+        float timer = 0f;
+        while (timer < 1.5f)
+        {
+            // LookAtでカメラの方向を向かせ、Y軸とZ軸の回転を固定してビルボード効果を作る
+            icon.transform.LookAt(playerCamera);
+            icon.transform.rotation = Quaternion.Euler(0, icon.transform.eulerAngles.y, 0);
+
+            timer += Time.deltaTime;
+            yield return null; // 1フレーム待つ
+        }
+
+        // 1.5秒後にアイコンを破壊する
+        Destroy(icon);
     }
 
     void UpdateChasing()
