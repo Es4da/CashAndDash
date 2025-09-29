@@ -27427,7 +27427,7 @@ MonoBehaviour:
     m_Bits: 192
   interactDistance: 2
   playerEyes: {fileID: 442435241}
-  knockbackForce: 30
+  knockbackForce: 15
   attackDamage: 50
   attackRange: 1
   attackCooldown: 1

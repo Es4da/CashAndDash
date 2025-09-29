@@ -8,7 +8,7 @@ using System.Collections.Generic; // Listを使うため
 public class EnemyAI : MonoBehaviour
 {
     // AIの状態を定義
-    public enum AIState { Patrolling, Chasing, Attacking }
+    public enum AIState { Idle, Chasing, Attacking }
 
     [Header("Stats")]
     public float patrolSpeed = 3.5f;
@@ -38,17 +38,24 @@ public class EnemyAI : MonoBehaviour
     private int currentPatrolIndex;
     private float lastAttackTime; // 最後に攻撃した時間
     private Animator animator;
+    private Vector3 startPosition;
+    private Quaternion startRotation;
 
-    void Start()
+    void Awake()
+    {
+        startPosition = transform.position;
+        startRotation = transform.rotation;
+    }
+
+    void OnEnable()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        animator = GetComponentInChildren<Animator>();
 
-        // 初期状態を巡回に設定
-        currentState = AIState.Patrolling;
-        agent.speed = patrolSpeed;
-        GoToNextPatrolPoint();
+        // ★重要: 復活時は必ずIdle状態から始める
+        currentState = AIState.Idle;
+        agent.isStopped = true; // 最初は停止
+        lastAttackTime = 0;
     }
 
     void Update()
@@ -76,8 +83,8 @@ public class EnemyAI : MonoBehaviour
         // 状態に応じた処理を実行
         switch (currentState)
         {
-            case AIState.Patrolling:
-                UpdatePatrolling();
+            case AIState.Idle:
+                UpdateIdle();
                 break;
             case AIState.Chasing:
                 UpdateChasing();
@@ -90,7 +97,7 @@ public class EnemyAI : MonoBehaviour
 
     // --- 各状態のアップデート関数 ---
 
-    void UpdatePatrolling()
+    void UpdateIdle()
     {
         // プレイヤーを発見したら、追跡モードに切り替え
         if (CanSeePlayer())
