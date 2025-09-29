@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
     public string hubSceneName = "Garage";
     public float initialUnlockDelay = 5f;
     public float subsequentUnlockInterval = 30f;
+    public float enemyRespawnTime = 5f;
     public GameObject vanPrefab;
     public AudioClip missionCompleteSfx;
     public AudioClip gameOverSfx;
@@ -443,10 +444,32 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+    
+    public void RespawnEnemy(GameObject enemy)
+    {
+        StartCoroutine(RespawnCoroutine(enemy));
+    }
+    private IEnumerator RespawnCoroutine(GameObject enemy)
+    {
+        yield return new WaitForSeconds(enemyRespawnTime);
+
+        // EnemyAIスクリプトから初期位置を取得する
+        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
+        if (enemyAI != null)
+        {
+            // 敵を初期位置に戻す
+            enemy.transform.position = enemyAI.startPosition; // Awakeで記憶した位置
+            enemy.transform.rotation = enemyAI.startRotation; // Awakeで記憶した向き
+        }
+        
+        // 敵を「復活」させる
+        enemy.SetActive(true);
+        Debug.Log("敵がリスポーンした！");
+    }
 
     public void DoHitStop(float duration)
     {
-        if(Time.timeScale > 0.5f) // 既にスローの時は実行しない
+        if (Time.timeScale > 0.5f) // 既にスローの時は実行しない
             StartCoroutine(HitStopCoroutine(duration));
     }
     

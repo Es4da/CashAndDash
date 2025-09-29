@@ -38,8 +38,8 @@ public class EnemyAI : MonoBehaviour
     private int currentPatrolIndex;
     private float lastAttackTime; // 最後に攻撃した時間
     private Animator animator;
-    private Vector3 startPosition;
-    private Quaternion startRotation;
+    public Vector3 startPosition;
+    public Quaternion startRotation;
 
     void Awake()
     {

@@ -12,6 +12,12 @@ public class EnemyHealth : MonoBehaviour
     private int currentHealth;
     private NavMeshAgent agent; // 追加: NavMeshAgentへの参照
 
+    void OnEnable()
+    {
+        // HPを全回復
+        currentHealth = maxHealth;
+    }
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -57,6 +63,8 @@ public class EnemyHealth : MonoBehaviour
     void Die()
     {
         Debug.Log(gameObject.name + "を倒した！");
-        Destroy(gameObject);
+        GameManager.instance.RespawnEnemy(gameObject);
+        // ★変更: 自分自身を破壊せず、非表示にする
+        gameObject.SetActive(false);
     }
 }
