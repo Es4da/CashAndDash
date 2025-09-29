@@ -51,8 +51,8 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        animator = GetComponentInChildren<Animator>();
 
-        // ★重要: 復活時は必ずIdle状態から始める
         currentState = AIState.Idle;
         agent.isStopped = true; // 最初は停止
         lastAttackTime = 0;
