@@ -210,11 +210,11 @@ public class EnemyAI : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, player.position) > viewRadius)
             return false;
-        
+
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
         if (Vector3.Angle(transform.forward, directionToPlayer) > viewAngle / 2)
             return false;
-        
+
         RaycastHit hit;
         if (Physics.Raycast(transform.position, directionToPlayer, out hit, viewRadius))
         {
@@ -222,5 +222,17 @@ public class EnemyAI : MonoBehaviour
                 return true;
         }
         return false;
+    }
+    
+    public void OnDamaged()
+    {
+        // もし、まだプレイヤーを見つけていない（巡回・待機中）状態だったら
+        if (currentState != AIState.Chasing && currentState != AIState.Attacking)
+        {
+            AudioManager.instance.PlaySfx(alertSfx);
+            StartCoroutine(ShowAlertIcon());
+            currentState = AIState.Chasing;
+            agent.speed = chaseSpeed;
+        }
     }
 }

@@ -11,6 +11,7 @@ public class EnemyHealth : MonoBehaviour
 
     private int currentHealth;
     private NavMeshAgent agent; // 追加: NavMeshAgentへの参照
+    private EnemyAI enemyAI;
 
     void OnEnable()
     {
@@ -22,6 +23,7 @@ public class EnemyHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         agent = GetComponent<NavMeshAgent>(); // 追加: NavMeshAgentを取得
+        enemyAI = GetComponent<EnemyAI>();
     }
 
     // 変更: knockbackDirectionを受け取れるようにする
@@ -36,6 +38,16 @@ public class EnemyHealth : MonoBehaviour
         Debug.Log(gameObject.name + "が" + damage + "ダメージを受けた！ 残りHP: " + currentHealth);
 
         // 追加: ノックバックのコルーチンを開始
+        if (agent != null)
+        {
+            StartCoroutine(KnockbackCoroutine(knockbackDirection));
+        }
+
+        if (enemyAI != null)
+        {
+            enemyAI.OnDamaged();
+        }
+
         if (agent != null)
         {
             StartCoroutine(KnockbackCoroutine(knockbackDirection));
