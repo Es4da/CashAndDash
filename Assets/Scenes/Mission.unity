@@ -3657,6 +3657,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &299986603
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -9942,6 +9944,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &603621472
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -10500,6 +10504,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &622171961
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -14607,6 +14613,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &884220919
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -14875,6 +14883,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &884643123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15301,7 +15311,8 @@ MonoBehaviour:
   missionSceneName: Mission
   hubSceneName: Garage
   initialUnlockDelay: 5
-  subsequentUnlockInterval: 10
+  subsequentUnlockInterval: 15
+  enemyRespawnTime: 5
   vanPrefab: {fileID: 0}
   missionCompleteSfx: {fileID: 8300000, guid: 69cfb2b5bf04a484ca6741c5b45a34d5, type: 3}
   gameOverSfx: {fileID: 8300000, guid: 951d525c642ebfe4288c466e7c28c24d, type: 3}
@@ -15383,6 +15394,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &918856792
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -15741,6 +15754,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &927104285
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -16583,6 +16598,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &956915417
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -21868,6 +21885,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1199051130
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -22118,6 +22137,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1202645376
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -22291,6 +22312,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1203251774
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -23729,6 +23752,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1273313156
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -24838,6 +24863,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1310901525
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -30022,6 +30049,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1648217494
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -30522,6 +30551,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1688558042
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -33992,6 +34023,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1950414141
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -34280,6 +34313,8 @@ MonoBehaviour:
   alertIconPrefab: {fileID: 4582753432871451488, guid: edd80809574106448afb96555e5719a2, type: 3}
   alertSfx: {fileID: 8300000, guid: 5262d94764fa15f498524669880143ba, type: 3}
   iconOffset: {x: 0, y: -0.5, z: 0}
+  startPosition: {x: 0, y: 0, z: 0}
+  startRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!195 &1958032562
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     public string missionSceneName = "Mission";
     public string hubSceneName = "Garage";
     public float initialUnlockDelay = 5f;
-    public float subsequentUnlockInterval = 30f;
+    public float subsequentUnlockInterval = 20f;
     public float enemyRespawnTime = 5f;
     public GameObject vanPrefab;
     public AudioClip missionCompleteSfx;
@@ -49,8 +49,8 @@ public class GameManager : MonoBehaviour
 
     private List<TreasureBox> allTreasureBoxes;
     private Coroutine unlockCoroutine;
-    private RectTransform notificationPanel; // ★追加
-    private TextMeshProUGUI notificationText; // ★追加
+    private RectTransform notificationPanel;
+    private TextMeshProUGUI notificationText;
 
     void Awake()
     {
@@ -83,37 +83,30 @@ public class GameManager : MonoBehaviour
         case 2: moneyGoal = 200; break;
         case 3: moneyGoal = 300; break;
         case 4: moneyGoal = 400; break;
-        default: moneyGoal = 500; break; // 5ラウンド以上は500
+        default: moneyGoal = 500; break;
     }
     Debug.Log("Round " + currentRound + " Start! Goal: " + moneyGoal);
 }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+{
+    AudioManager.instance.SetCutsceneMode(false);
+    DynamicGI.UpdateEnvironment();
+    
+    if (scene.name == missionSceneName)
     {
-        // ★★★ 修正点 ★★★
-        // 1. まず、シーン内のUIを全て探しに行く
-        FindSceneUI(scene.name);
-
-        // 2. UIを探した後で、フェードアウトを開始する
-        StartCoroutine(Fade(0f));
-
-        // 3. その他の設定を行う
-        AudioManager.instance.SetCutsceneMode(false);
-        
-        if (scene.name == missionSceneName)
-        {
-            if (currentRound == 1)
-            {
-                StartCoroutine(ShowTutorialCoroutine());
-            }
-            isPlayerInvincible = false;
-            SetMissionGoal();
-            InitializeStartPoint();
-            InitializeTreasureBoxes();
-        }
-        
-        DynamicGI.UpdateEnvironment();
+        SetMissionGoal();
     }
+    FindSceneUI(scene.name);
+
+    StartCoroutine(Fade(0f));
+    
+    if (scene.name == missionSceneName)
+    {
+        InitializeStartPoint();
+        InitializeTreasureBoxes();
+    }
+}
 
     void FindSceneUI(string sceneName)
     {
@@ -126,8 +119,6 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Canvasの子供の中から、必要なUIコンポーネントを探し出す
-        // transform.Find()は、非アクティブな子オブジェクトも探すことができる
         if (sceneName == missionSceneName)
         {
             moneyText = canvas.transform.Find("MoneyText")?.GetComponent<TextMeshProUGUI>();
@@ -203,7 +194,6 @@ public class GameManager : MonoBehaviour
         tutorialPanel.gameObject.SetActive(false);
     }
 
-    // ★追加: 通知の表示・非表示アニメーションを制御するコルーチン
     private IEnumerator NotificationCoroutine(string message)
     {
         if (notificationPanel == null) yield break;
@@ -356,7 +346,6 @@ public class GameManager : MonoBehaviour
         group.alpha = targetAlpha;
     }
     
-    // --- 以下の関数は、あなたのコードから変更・整理したものです ---
     public void UpdateStaminaUI(float currentStamina, float maxStamina)
     {
         if (staminaBar != null)
@@ -382,7 +371,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // --- 以下の関数はあなたのコードには無かったものや、整理が必要なものです ---
     void InitializeStartPoint()
     {
         var spawnLocations = GameObject.FindObjectsOfType<GameObject>()
